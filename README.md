@@ -86,6 +86,14 @@ make lint           # ruff (check + format) on the backend,
 There is no CI. Whatever you claim about a change has to come with the
 output you actually captured.
 
+`test:unit` + `lint` alone are not enough to prove the frontend healthy: a
+page module can export something Next's App Router build rejects (only
+`default` plus a fixed set of framework fields are permitted from
+`page.tsx`) without either eslint, `tsc --noEmit` against a stale or absent
+`.next/types`, or vitest ever seeing it. Run `cd frontend && npm run build`
+(with no dev server running) as part of verifying a change — it is the
+only command that actually exercises Next's page-export validation.
+
 Never run `npm run build` while `next dev` is running — it clobbers `.next`
 and makes every route hang. This also applies to `make build` / `make up`
 against a native `next dev` holding the same port.

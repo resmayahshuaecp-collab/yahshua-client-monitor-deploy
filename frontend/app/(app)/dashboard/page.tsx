@@ -1,19 +1,6 @@
 import { Panel } from "@/components/dashboard/panel";
 import { StatCard } from "@/components/dashboard/stat-card";
-
-/**
- * The six cards named in the plan's Milestone 0 story. Every value is a
- * placeholder; Milestone 1 wires the first four and Milestone 2 the last
- * two.
- */
-export const DASHBOARD_STATS = [
-  { label: "Total Clients", hint: "Globe and SME combined" },
-  { label: "Globe Clients", hint: "Active, expiring and expired" },
-  { label: "SME Clients", hint: "Active, expiring and expired" },
-  { label: "Active Contracts", hint: "Not expiring within 30 days" },
-  { label: "Open Concerns", hint: "Bugs and RSC not yet resolved" },
-  { label: "Meetings This Week", hint: "Booked, Monday to Sunday" },
-] as const;
+import { DASHBOARD_STATS } from "@/components/dashboard/stats";
 
 export default function DashboardPage() {
   return (

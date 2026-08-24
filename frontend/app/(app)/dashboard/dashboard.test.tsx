@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import DashboardPage, { DASHBOARD_STATS } from "@/app/(app)/dashboard/page";
+import DashboardPage from "@/app/(app)/dashboard/page";
+import { DASHBOARD_STATS } from "@/components/dashboard/stats";
 
 describe("Dashboard shell", () => {
   it("renders the six stat cards the plan names", () => {
