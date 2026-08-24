@@ -1,0 +1,22 @@
+# Postgres only. Image builds do not work on this machine, so both
+# applications run natively -- see README.
+services:
+  postgres:
+    image: postgres:16
+    container_name: client-monitor-postgres
+    environment:
+      POSTGRES_DB: client_monitor
+      POSTGRES_USER: client_monitor
+      POSTGRES_PASSWORD: client_monitor
+    ports:
+      - "5439:5432"
+    volumes:
+      - client-monitor-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U client_monitor"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  client-monitor-pgdata:

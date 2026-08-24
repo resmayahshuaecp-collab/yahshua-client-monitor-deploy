@@ -1,3 +1,12 @@
-
-# SDD scratch
-.superpowers/
+__pycache__/
+*.py[cod]
+.env
+.venv/
+venv/
+node_modules/
+.next/
+/frontend/test-results/
+/frontend/playwright-report/
+.pytest_cache/
+.ruff_cache/
+*.sqlite3
