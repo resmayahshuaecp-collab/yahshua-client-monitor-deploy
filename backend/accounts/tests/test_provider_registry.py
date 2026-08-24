@@ -1,3 +1,5 @@
+from dataclasses import FrozenInstanceError
+
 import pytest
 from django.core.checks import run_checks
 from django.test import override_settings
@@ -17,7 +19,10 @@ def test_anonymous_actor_is_not_authenticated():
 def test_actor_is_immutable():
     actor = Actor.anonymous()
 
-    with pytest.raises(Exception):
+    # FrozenInstanceError specifically, not a blind Exception: a bare
+    # `raises(Exception)` would also pass if the assignment failed for some
+    # unrelated reason, which would not prove the dataclass is frozen.
+    with pytest.raises(FrozenInstanceError):
         actor.role = "ADMIN"
 
 

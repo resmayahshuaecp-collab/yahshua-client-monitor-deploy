@@ -3,12 +3,18 @@
 BACKEND := backend
 FRONTEND := frontend
 
+# pyenv exposes a bare `python` shim with no version bound to it, so `python`
+# fails with "command not found" while `python3` works. Override on the
+# command line to point at a venv: `make test-backend PYTHON=.venv/bin/python`.
+PYTHON ?= python3
+PIP ?= $(PYTHON) -m pip
+
 help:
-	@grep -E '^[a-z-]+:' $(MAKEFILE_LIST) | sed 's/:.*//' | sort
+	@grep -E '^[a-z0-9-]+:' $(MAKEFILE_LIST) | sed 's/:.*//' | sort
 
 setup:
 	cp -n .env.example .env || true
-	cd $(BACKEND) && pip install -r requirements/local.txt
+	cd $(BACKEND) && $(PIP) install -r requirements/local.txt
 	cd $(FRONTEND) && npm install
 
 infra:
@@ -18,19 +24,19 @@ infra-down:
 	docker compose down
 
 migrate:
-	cd $(BACKEND) && python manage.py migrate
+	cd $(BACKEND) && $(PYTHON) manage.py migrate
 
 seed:
-	cd $(BACKEND) && python manage.py seed_local_users
+	cd $(BACKEND) && $(PYTHON) manage.py seed_local_users
 
 dev-backend:
-	cd $(BACKEND) && python manage.py runserver 8085
+	cd $(BACKEND) && $(PYTHON) manage.py runserver 8085
 
 dev-frontend:
 	cd $(FRONTEND) && npm run dev
 
 test-backend:
-	cd $(BACKEND) && python -m pytest
+	cd $(BACKEND) && $(PYTHON) -m pytest
 
 test-frontend:
 	cd $(FRONTEND) && npm run test:unit

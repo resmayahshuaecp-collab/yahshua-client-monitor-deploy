@@ -19,9 +19,7 @@ def test_anonymous_request_still_gets_an_actor(client):
 @pytest.mark.django_db
 def test_middleware_sets_the_actor_from_a_cookie(settings):
     """ActorMiddleware must put the resolved identity on the request."""
-    user = User.objects.create_user(
-        username="dan", email="dan@example.com", password="pw-12345678"
-    )
+    user = User.objects.create_user(username="dan", email="dan@example.com", password="pw-12345678")
     UserProfile.objects.create(user=user, role=Role.ENGINEER, display_name="Dan E.")
     access, _refresh = LocalAuthProvider().issue_tokens(user)
 

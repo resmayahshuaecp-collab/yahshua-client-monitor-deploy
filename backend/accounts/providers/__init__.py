@@ -25,7 +25,6 @@ def get_provider() -> AuthProvider:
         dotted_path = PROVIDERS[name]
     except KeyError:
         raise UnknownAuthProvider(
-            f"AUTH_PROVIDER={name!r} is not a known provider. "
-            f"Known providers: {sorted(PROVIDERS)}."
+            f"AUTH_PROVIDER={name!r} is not a known provider. Known providers: {sorted(PROVIDERS)}."
         ) from None
     return import_string(dotted_path)()

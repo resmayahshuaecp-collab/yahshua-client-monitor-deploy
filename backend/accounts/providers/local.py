@@ -68,7 +68,9 @@ class LocalAuthProvider:
             email=user.email,
             # A profile-less user keeps a usable name but gets role=None,
             # which permissions.require_role refuses outright.
-            name=(profile.display_name if profile and profile.display_name else user.get_username()),
+            name=(
+                profile.display_name if profile and profile.display_name else user.get_username()
+            ),
             role=(profile.role if profile else None),
             is_authenticated=True,
         )
