@@ -22,16 +22,10 @@ def test_actor_is_immutable():
 
 
 @override_settings(AUTH_PROVIDER="local")
-def test_local_is_the_configured_provider_name():
-    """The registry maps 'local' to the provider Task 4 implements.
+def test_local_is_the_configured_provider():
+    from accounts.providers.local import LocalAuthProvider
 
-    Deliberately asserts the dotted path rather than importing the class:
-    accounts.providers.local does not exist until Task 4, and Task 4 adds
-    the isinstance test that supersedes this one.
-    """
-    from accounts.providers import PROVIDERS
-
-    assert PROVIDERS["local"] == "accounts.providers.local.LocalAuthProvider"
+    assert isinstance(get_provider(), LocalAuthProvider)
 
 
 @override_settings(AUTH_PROVIDER="host")

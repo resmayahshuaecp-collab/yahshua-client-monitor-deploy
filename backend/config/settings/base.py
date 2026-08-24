@@ -31,7 +31,9 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    # accounts.middleware.ActorMiddleware is added by Task 4, when it exists.
+    # Must come after AuthenticationMiddleware: it resolves request.actor
+    # independently of Django's session-based request.user.
+    "accounts.middleware.ActorMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
