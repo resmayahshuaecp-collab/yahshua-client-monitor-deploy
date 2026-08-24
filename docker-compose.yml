@@ -1,5 +1,12 @@
-# Postgres only. Image builds do not work on this machine, so both
-# applications run natively -- see README.
+# Postgres runs here always. The two applications are behind the `apps`
+# profile, so `docker compose up -d postgres` (what `make infra` runs) still
+# starts the database and nothing else, exactly as it did before the apps
+# were containerised. `make up` adds the profile and starts all three.
+#
+# Both applications can also be run natively -- see `make dev-backend` and
+# `make dev-frontend`. Neither path is the "real" one; they publish the same
+# ports and are interchangeable.
+
 services:
   postgres:
     image: postgres:16
@@ -17,6 +24,60 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+
+  backend:
+    profiles: ["apps"]
+    build:
+      context: ./backend
+      target: dev
+    container_name: client-monitor-backend
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.local
+      DJANGO_SECRET_KEY: dev-only-not-a-real-secret
+      # postgres:5432 -- the service name and its INTERNAL port. localhost:5439
+      # is the host's view and means nothing inside this network.
+      DATABASE_URL: postgres://client_monitor:client_monitor@postgres:5432/client_monitor
+      AUTH_PROVIDER: local
+      # What the BROWSER calls the frontend. Django uses this for CORS and
+      # CSRF, so it must be the host-visible origin, never http://frontend:3003.
+      FRONTEND_ORIGIN: http://localhost:3003
+    ports:
+      - "8085:8085"
+    volumes:
+      # Source bind-mount: edit on the host, the autoreloader picks it up.
+      - ./backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    profiles: ["apps"]
+    build:
+      context: ./frontend
+      target: dev
+    container_name: client-monitor-frontend
+    environment:
+      # Two addresses for the same backend, and they are not interchangeable:
+      #
+      #   BACKEND_ORIGIN            used by Next's own server (route handlers)
+      #                             -- container to container, service DNS.
+      #   NEXT_PUBLIC_BACKEND_ORIGIN  baked into the browser bundle -- must be
+      #                             what the BROWSER can reach, i.e. localhost.
+      #
+      # Setting both to the same value breaks one side or the other.
+      BACKEND_ORIGIN: http://backend:8085
+      NEXT_PUBLIC_BACKEND_ORIGIN: http://localhost:8085
+    ports:
+      - "3003:3003"
+    volumes:
+      - ./frontend:/app
+      # Anonymous volumes mask the host's node_modules and .next. Without
+      # these the host's copies shadow the image's, and a package built for
+      # the host platform fails inside the container.
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - backend
 
 volumes:
   client-monitor-pgdata:

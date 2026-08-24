@@ -1,0 +1,10 @@
+# node_modules is ~360 packages built for the host platform. Shipping it into
+# the context is slow and can break the image with host-native binaries --
+# the image installs its own.
+node_modules/
+.next/
+test-results/
+playwright-report/
+*.tsbuildinfo
+.env
+.env.local

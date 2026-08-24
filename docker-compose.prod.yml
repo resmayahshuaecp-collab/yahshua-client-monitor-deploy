@@ -1,0 +1,36 @@
+# Production-image overlay. Use with the base file:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+#     --profile apps up -d --build          (or: make up-prod)
+#
+# What changes: the `prod` build target, no source bind-mounts, gunicorn
+# instead of runserver, `next start` instead of `next dev`.
+#
+# TLS: SECURE_SSL_REDIRECT defaults to on, so plain http gets a 301. There is
+# no TLS terminator in front of a container on a laptop, so this overlay turns
+# it off for the local smoke test only. Behind a real load balancer, drop that
+# line and set DJANGO_TRUST_PROXY_SSL_HEADER=true instead, so Django reads the
+# proxy's X-Forwarded-Proto rather than redirecting forever.
+#
+# Static files ARE served: the image runs collectstatic at build time and
+# WhiteNoise serves the result, so Django admin renders styled with no
+# separate web server.
+
+services:
+  backend:
+    build:
+      target: prod
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.production
+      # production.py reads this with NO default and refuses to start without
+      # it. This value is for a local smoke test only.
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-local-smoke-test-only-change-me}
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,backend
+      # Local smoke test only -- see the note at the top of this file.
+      DJANGO_SECURE_SSL_REDIRECT: "false"
+    volumes: !override []
+
+  frontend:
+    build:
+      target: prod
+    volumes: !override []

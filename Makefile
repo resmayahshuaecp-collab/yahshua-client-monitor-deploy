@@ -1,4 +1,4 @@
-.PHONY: help setup infra infra-down migrate seed dev dev-backend dev-frontend test test-backend test-frontend test-e2e lint
+.PHONY: help setup infra infra-down migrate seed dev dev-backend dev-frontend test test-backend test-frontend test-e2e lint build up up-prod down logs sh-backend
 
 BACKEND := backend
 FRONTEND := frontend
@@ -22,6 +22,32 @@ infra:
 
 infra-down:
 	docker compose down
+
+# --- containerised apps (optional; the native targets above still work) ---
+# The apps sit behind compose's `apps` profile, so `make infra` stays
+# Postgres-only. These publish the same ports as the native path: 8085, 3003.
+COMPOSE_PROD := -f docker-compose.yml -f docker-compose.prod.yml
+
+build:
+	docker compose --profile apps build
+
+up:
+	docker compose --profile apps up -d --build
+	@echo "backend  http://localhost:8085/healthz"
+	@echo "frontend http://localhost:3003"
+
+up-prod:
+	docker compose $(COMPOSE_PROD) --profile apps up -d --build
+	@echo "production images. http gets a 301 to https -- SECURE_SSL_REDIRECT."
+
+down:
+	docker compose --profile apps down
+
+logs:
+	docker compose --profile apps logs -f --tail=50
+
+sh-backend:
+	docker compose exec backend bash
 
 migrate:
 	cd $(BACKEND) && $(PYTHON) manage.py migrate

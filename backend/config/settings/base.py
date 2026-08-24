@@ -27,6 +27,11 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    # Immediately after SecurityMiddleware, per WhiteNoise's docs. It serves
+    # collected static files (Django admin's CSS, chiefly) without a separate
+    # web server. Under DEBUG the staticfiles app handles them instead, so
+    # this is inert in local development.
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -66,6 +71,9 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "static/"
+# collectstatic's destination. Needed for any DEBUG=False run -- without it
+# collectstatic refuses and the admin renders unstyled.
+STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # --- Identity -------------------------------------------------------------

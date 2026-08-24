@@ -1,0 +1,11 @@
+# The build context is sent to the daemon in full -- keep it small and keep
+# host-only artifacts out of the image.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+*.sqlite3
+.env
+staticfiles/

@@ -11,3 +11,6 @@ node_modules/
 .ruff_cache/
 *.sqlite3
 *.tsbuildinfo
+
+# collectstatic output
+/backend/staticfiles/
