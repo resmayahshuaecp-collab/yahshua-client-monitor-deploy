@@ -23,11 +23,25 @@ export async function POST(request: Request) {
     body,
   });
 
-  const payload = (await upstream.json()) as LoginResponse;
-  if (!upstream.ok) {
-    return NextResponse.json(payload, { status: upstream.status });
+  const raw = await upstream.text();
+  let parsed: unknown = null;
+  try {
+    parsed = raw ? JSON.parse(raw) : null;
+  } catch {
+    parsed = null;
   }
 
+  if (!upstream.ok) {
+    // Django's refusals are JSON with a `code`. Anything else -- an HTML 500
+    // page, an empty body -- must still produce a usable response rather than
+    // crashing this handler.
+    return NextResponse.json(
+      parsed ?? { code: "upstream_error", message: "The server could not be reached." },
+      { status: upstream.status },
+    );
+  }
+
+  const payload = parsed as LoginResponse;
   const response = NextResponse.json({ actor: payload.actor });
   // The tokens stop here. They are never returned to the browser, so no
   // script can read them.

@@ -38,32 +38,41 @@ api.interceptors.request.use((config) => {
 
 let refreshing: Promise<void> | null = null;
 
-api.interceptors.response.use(
-  (response) => response,
-  async (error: unknown) => {
-    if (!axios.isAxiosError(error)) throw error;
-    const config = error.config as RetriableRequestConfig | undefined;
-    if (error.response?.status !== 401 || !config || config.__retried) {
-      throw error;
-    }
-    config.__retried = true;
+// Exported (not just used inline below) so the redirect-vs-rethrow branching
+// can be exercised directly in tests without standing up a real HTTP mock.
+export async function handleResponseError(error: unknown) {
+  if (!axios.isAxiosError(error)) throw error;
+  const config = error.config as RetriableRequestConfig | undefined;
+  if (error.response?.status !== 401 || !config) {
+    // Includes 403: Django uses 401 solely for "not authenticated" and 403
+    // for role refusals, and a logged-in user with the wrong role should
+    // not get bounced to /login.
+    throw error;
+  }
+  if (config.__retried) {
+    // The retried request itself came back 401 -- refreshing did not fix it.
+    if (typeof window !== "undefined") window.location.href = "/login";
+    throw error;
+  }
+  config.__retried = true;
 
-    // One shared refresh, so a page firing six queries at once does not
-    // fire six refreshes and invalidate its own new token.
-    refreshing ??= fetch("/api/auth/refresh", { method: "POST" })
-      .then((response) => {
-        if (!response.ok) throw new Error("refresh failed");
-      })
-      .finally(() => {
-        refreshing = null;
-      });
+  // One shared refresh, so a page firing six queries at once does not
+  // fire six refreshes and invalidate its own new token.
+  refreshing ??= fetch("/api/auth/refresh", { method: "POST" })
+    .then((response) => {
+      if (!response.ok) throw new Error("refresh failed");
+    })
+    .finally(() => {
+      refreshing = null;
+    });
 
-    try {
-      await refreshing;
-    } catch {
-      if (typeof window !== "undefined") window.location.href = "/login";
-      throw error;
-    }
-    return api.request(config);
-  },
-);
+  try {
+    await refreshing;
+  } catch {
+    if (typeof window !== "undefined") window.location.href = "/login";
+    throw error;
+  }
+  return api.request(config);
+}
+
+api.interceptors.response.use((response) => response, handleResponseError);
