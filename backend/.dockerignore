@@ -7,5 +7,10 @@ __pycache__/
 .venv/
 venv/
 *.sqlite3
-.env
 staticfiles/
+
+# Every .env variant, not just .env -- a secret baked into an image layer
+# is still in the image after a later step deletes it.
+.env
+.env.*
+!.env.example

@@ -6,5 +6,9 @@ node_modules/
 test-results/
 playwright-report/
 *.tsbuildinfo
+
+# Every .env variant, not just .env -- a secret baked into an image layer
+# is still in the image after a later step deletes it.
 .env
-.env.local
+.env.*
+!.env.local.example

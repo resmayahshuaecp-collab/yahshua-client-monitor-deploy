@@ -54,14 +54,17 @@ ENV NODE_ENV=production
 # node_modules comes from `deps` rather than being reinstalled: `npm ci
 # --omit=dev` would drop packages Next needs at runtime in a non-standalone
 # build. Trading image size for a server that actually starts.
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=build /app/.next ./.next
-COPY package.json package-lock.json next.config.ts ./
+# --chown on each COPY, never a `RUN chown -R` afterwards: chown rewrites
+# every file into a new layer, so a separate step stored all ~800MB of
+# node_modules and .next a second time and doubled the image.
+#
+# The node image ships an unprivileged `node` user (uid 1000). Ownership has
+# to be its, because Next writes into .next and node_modules at startup and
+# exits 1 on EACCES.
+COPY --from=deps --chown=node:node /app/node_modules ./node_modules
+COPY --from=build --chown=node:node /app/.next ./.next
+COPY --chown=node:node package.json package-lock.json next.config.ts ./
 
-# The node image ships an unprivileged `node` user (uid 1000). Everything
-# above was copied as root, so hand it over -- Next writes into .next and
-# node_modules at startup and exits 1 on EACCES.
-RUN chown -R node:node /app
 USER node
 
 EXPOSE 3003

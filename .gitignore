@@ -1,16 +1,57 @@
+# --- secrets and local config -------------------------------------------
+# Only `.env` was covered before, which missed every variant the tooling
+# actually creates. The README tells you to `cp .env.local.example .env.local`,
+# so that file holds real values on a real machine and must never be staged.
+# The *.example files are committed and are what belongs in git.
+.env
+.env.*
+!.env.example
+!.env.*.example
+!frontend/.env.local.example
+*.pem
+*.key
+
+# --- python --------------------------------------------------------------
 __pycache__/
 *.py[cod]
-.env
+*.egg-info/
 .venv/
 venv/
-node_modules/
-.next/
-/frontend/test-results/
-/frontend/playwright-report/
 .pytest_cache/
 .ruff_cache/
-*.sqlite3
-*.tsbuildinfo
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
 
-# collectstatic output
+# --- django --------------------------------------------------------------
+*.sqlite3
+# collectstatic output. Generated at image build time; never committed.
 /backend/staticfiles/
+/backend/media/
+
+# --- node / next ---------------------------------------------------------
+node_modules/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+.npm/
+.eslintcache
+
+# --- test artifacts ------------------------------------------------------
+/frontend/test-results/
+/frontend/playwright-report/
+/frontend/blob-report/
+/frontend/playwright/.cache/
+coverage/
+
+# --- editors and os ------------------------------------------------------
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+
+# --- logs ----------------------------------------------------------------
+*.log
+npm-debug.log*
