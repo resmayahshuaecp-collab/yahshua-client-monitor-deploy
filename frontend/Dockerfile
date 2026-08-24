@@ -51,21 +51,26 @@ RUN npm run build
 FROM base AS prod
 ENV NODE_ENV=production
 
-# node_modules comes from `deps` rather than being reinstalled: `npm ci
-# --omit=dev` would drop packages Next needs at runtime in a non-standalone
-# build. Trading image size for a server that actually starts.
-# --chown on each COPY, never a `RUN chown -R` afterwards: chown rewrites
-# every file into a new layer, so a separate step stored all ~800MB of
-# node_modules and .next a second time and doubled the image.
+# A standalone build carries its own minimal node_modules and a server.js, so
+# nothing is installed here and `next start` is not used. What is NOT traced
+# into it is the point: typescript, vite, rolldown, playwright and the rest of
+# the build-time tree never reach production.
 #
-# The node image ships an unprivileged `node` user (uid 1000). Ownership has
-# to be its, because Next writes into .next and node_modules at startup and
-# exits 1 on EACCES.
-COPY --from=deps --chown=node:node /app/node_modules ./node_modules
-COPY --from=build --chown=node:node /app/.next ./.next
-COPY --chown=node:node package.json package-lock.json next.config.ts ./
+# --chown on each COPY rather than a `RUN chown -R` afterwards: chown rewrites
+# every file into a new layer and would store the whole tree twice.
+COPY --from=build --chown=node:node /app/.next/standalone ./
+# Static assets and the client chunks are deliberately outside the standalone
+# bundle; without this copy the pages render unstyled and the JS 404s.
+COPY --from=build --chown=node:node /app/.next/static ./.next/static
 
+# Next writes into .next at startup and exits on EACCES, so ownership must be
+# the unprivileged user's (uid 1000, shipped by the node image).
 USER node
 
+# server.js reads both. HOSTNAME defaults to localhost, which inside a
+# container means the port is published but nothing outside can reach it.
+ENV PORT=3003 \
+    HOSTNAME=0.0.0.0
+
 EXPOSE 3003
-CMD ["npm", "run", "start"]
+CMD ["node", "server.js"]
