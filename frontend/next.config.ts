@@ -1,3 +1,5 @@
+import path from "node:path";
+
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -11,6 +13,14 @@ const nextConfig: NextConfig = {
   // Affects `next build` only -- `next dev` ignores it, so the native and
   // containerised dev workflows are unchanged.
   output: "standalone",
+
+  // Pin the tracing root to this directory. Standalone tracing infers a
+  // workspace root from the nearest lockfiles, and there are unrelated ones
+  // in a parent directory on some machines (~/package-lock.json,
+  // ~/yarn.lock), which makes it infer ~ and then fail to find the .nft.json
+  // files it just wrote -- `next build` compiles, then dies with ENOENT.
+  // Docker never hit this because /app has no parent lockfiles.
+  outputFileTracingRoot: path.join(__dirname),
 };
 
 export default nextConfig;
