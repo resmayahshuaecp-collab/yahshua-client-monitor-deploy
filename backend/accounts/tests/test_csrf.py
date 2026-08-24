@@ -43,6 +43,27 @@ def test_cookie_authenticated_post_with_csrf_succeeds(engineer, settings):
 
 
 @pytest.mark.django_db
+def test_a_browser_can_satisfy_the_csrf_gate_via_the_csrf_endpoint(engineer, settings):
+    """Proves C2: GET /api/auth/csrf is what actually lets a real browser
+    clear the gate, rather than the test manufacturing the cookie itself.
+    """
+    client = Client(enforce_csrf_checks=True)
+    access, _refresh = LocalAuthProvider().issue_tokens(engineer)
+    client.cookies[settings.ACCESS_COOKIE_NAME] = access
+
+    csrf_response = client.get("/api/auth/csrf")
+    assert csrf_response.status_code == 200
+    assert csrf_response.json() == {"ok": True}
+    # Set by ensure_csrf_cookie's own response phase, not by this test.
+    token = client.cookies["csrftoken"].value
+
+    response = client.post("/api/auth/logout", HTTP_X_CSRFTOKEN=token)
+
+    assert response.status_code == 200
+    assert response.json() == {"ok": True}
+
+
+@pytest.mark.django_db
 def test_header_authenticated_post_needs_no_csrf(engineer):
     # A bearer header is not sent automatically by a browser, so there is
     # nothing for an attacker's page to ride on. Requiring CSRF here would

@@ -1,6 +1,12 @@
 from .base import *  # noqa: F403
 
-DEBUG = True  # seed_local_users refuses to run with DEBUG=False
+# Django's test runner forces settings.DEBUG = False for the whole session
+# regardless of what is set here (see django.test.utils.setup_test_environment),
+# so this must stay False to match reality. Tests that exercise
+# seed_local_users (which refuses to run with DEBUG=False) carry an explicit
+# per-test `settings.DEBUG = True` override instead -- see
+# accounts/tests/test_auth_api.py.
+DEBUG = False
 ALLOWED_HOSTS = ["testserver", "localhost"]
 PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
 

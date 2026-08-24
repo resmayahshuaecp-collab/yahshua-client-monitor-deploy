@@ -3,6 +3,7 @@ from django.urls import path
 from ninja_extra import NinjaExtraAPI
 
 from accounts.api import router as auth_router
+from accounts.views import csrf as csrf_view
 from core.api_errors import register_refusal_handler
 from core.api_health import healthz
 
@@ -12,6 +13,11 @@ api.add_router("/auth", auth_router)
 
 urlpatterns = [
     path("healthz", healthz),
+    # Ahead of "api/": a plain Django view (ensure_csrf_cookie needs to run
+    # against a real HttpResponse, which ninja's own dispatch never produces
+    # for the decorator to see -- see accounts/views.py), mounted at the same
+    # /api/auth/ prefix as the ninja-routed auth endpoints.
+    path("api/auth/csrf", csrf_view),
     path("api/", api.urls),
     path("admin/", admin.site.urls),
 ]

@@ -43,6 +43,13 @@ CMD ["npm", "run", "dev"]
 # Needs the dev dependencies (typescript, tailwind, the eslint config), so it
 # builds from `deps` rather than a pruned tree.
 FROM deps AS build
+# NEXT_PUBLIC_* vars are inlined into the browser bundle by `next build` --
+# baked in at BUILD time, not read at container start. Compose's
+# `environment:` block cannot reach this: it only affects the running
+# process, which is why it must come in as a build arg instead. A different
+# backend origin needs a rebuild (`docker compose build`), not a restart.
+ARG NEXT_PUBLIC_BACKEND_ORIGIN=http://localhost:8085
+ENV NEXT_PUBLIC_BACKEND_ORIGIN=${NEXT_PUBLIC_BACKEND_ORIGIN}
 COPY . .
 RUN npm run build
 

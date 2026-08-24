@@ -75,3 +75,10 @@ test: test-backend test-frontend test-e2e
 lint:
 	cd $(BACKEND) && ruff check . && ruff format --check .
 	cd $(FRONTEND) && npm run lint && npx tsc --noEmit
+	# `npm run build` is the only command that exercises Next's page-export
+	# validation (see README's "Tests" section) -- eslint and tsc both miss
+	# it. This target assumes no dev server (native `next dev` or a `next
+	# dev`-backed container) is holding :3003: building into a live one
+	# clobbers `.next` and hangs every route. Stop `make dev-frontend` / `make
+	# up` first.
+	cd $(FRONTEND) && rm -rf .next && npm run build

@@ -1,8 +1,10 @@
 # --- secrets and local config -------------------------------------------
 # Only `.env` was covered before, which missed every variant the tooling
-# actually creates. The README tells you to `cp .env.local.example .env.local`,
-# so that file holds real values on a real machine and must never be staged.
-# The *.example files are committed and are what belongs in git.
+# actually creates. The README's "First run" sections tell you to
+# `cp .env.example .env` and, optionally, `cp frontend/.env.local.example
+# frontend/.env.local`, so those copies hold real values on a real machine
+# and must never be staged. The *.example files are committed and are what
+# belongs in git.
 .env
 .env.*
 !.env.example

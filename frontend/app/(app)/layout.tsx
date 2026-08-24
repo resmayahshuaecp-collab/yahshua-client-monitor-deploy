@@ -1,14 +1,21 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
 import { fetchActor } from "@/lib/actor";
+import { primeCsrfCookie } from "@/lib/csrf";
 import { QueryProvider } from "@/lib/query-client";
 
 function Shell({ children }: { children: ReactNode }) {
   const { data: actor } = useQuery({ queryKey: ["actor"], queryFn: fetchActor });
+
+  // Once per mount of the app shell, not per request: every state-changing
+  // call after this point can rely on the cookie already being there.
+  useEffect(() => {
+    void primeCsrfCookie();
+  }, []);
 
   return (
     <div className="flex min-h-screen">

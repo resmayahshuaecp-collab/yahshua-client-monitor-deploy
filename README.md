@@ -40,6 +40,17 @@ make dev-backend    # in one terminal
 make dev-frontend   # in another
 ```
 
+`make setup` copies `.env.example` to `.env` for the backend. The frontend's
+own defaults (`http://localhost:8085`, baked into `frontend/lib/api.ts` and
+the `app/api/auth/*` route handlers) are already correct for native
+development, so `frontend/.env.local` is optional there. It exists for the
+case where they are not enough -- e.g. a backend on a different port or
+host -- and Next.js loads it automatically:
+
+```bash
+cp frontend/.env.local.example frontend/.env.local
+```
+
 ## First run — containerized
 
 Postgres always runs in Docker; the two apps sit behind compose's `apps`
