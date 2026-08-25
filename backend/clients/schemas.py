@@ -10,3 +10,10 @@ class ClientOut(Schema):
     contract_start: date
     contract_end: date
     status: str
+
+
+class ClientIn(Schema):
+    name: str
+    segment: str
+    contract_start: date
+    contract_end: date
