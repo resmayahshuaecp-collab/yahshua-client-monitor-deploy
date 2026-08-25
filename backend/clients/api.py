@@ -6,6 +6,7 @@ from accounts.permissions import require_role
 from accounts.refusals import Refusal
 from clients.models import Client
 from clients.schemas import ClientIn, ClientOut
+from clients.schemas import ClientIn, ClientOut, ClientStatsOut
 
 router = Router(tags=["clients"])
 
@@ -23,6 +24,17 @@ def list_clients(request):
         raise Refusal("not_authenticated", "This request carries no identity.")
     return Client.objects.all()
 
+@router.get("/stats", response=ClientStatsOut, auth=None)
+def client_stats(request):
+    if not request.actor.is_authenticated:
+        raise Refusal("not_authenticated", "This request carries no identity.")
+    clients = list(Client.objects.all())
+    return {
+        "total": len(clients),
+        "globe": sum(c.segment == "GLOBE" for c in clients),
+        "sme": sum(c.segment == "SME" for c in clients),
+        "active_contracts": sum(c.status == "ACTIVE" for c in clients),
+    }
 
 @router.post("/", response=ClientOut, auth=None)
 def create_client(request, payload: ClientIn):

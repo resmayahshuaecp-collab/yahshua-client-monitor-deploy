@@ -11,9 +11,15 @@ class ClientOut(Schema):
     contract_end: date
     status: str
 
-
 class ClientIn(Schema):
     name: str
     segment: str
     contract_start: date
     contract_end: date
+
+
+class ClientStatsOut(Schema):
+    total: int
+    globe: int
+    sme: int
+    active_contracts: int
