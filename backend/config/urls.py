@@ -4,12 +4,14 @@ from ninja_extra import NinjaExtraAPI
 
 from accounts.api import router as auth_router
 from accounts.views import csrf as csrf_view
+from clients.api import router as clients_router      # <-- ADD THIS
 from core.api_errors import register_refusal_handler
 from core.api_health import healthz
 
 api = NinjaExtraAPI(title="YAHSHUA Client Monitor API", version="1.0.0")
 register_refusal_handler(api)
 api.add_router("/auth", auth_router)
+api.add_router("/clients", clients_router)            # <-- ADD THIS
 
 urlpatterns = [
     path("healthz", healthz),
