@@ -6,8 +6,8 @@
  */
 export const NAV_SECTIONS = [
   { label: "Dashboard", href: "/dashboard", built: true },
-  { label: "Globe Clients", href: "/globe", built: false },
-  { label: "SME Clients", href: "/sme", built: false },
+  { label: "Globe Clients", href: "/globe", built: true },
+  { label: "SME Clients", href: "/sme", built: true },
   { label: "Bugs", href: "/bugs", built: false },
   { label: "RSC", href: "/rsc", built: false },
   { label: "Meetings", href: "/meetings", built: false },
