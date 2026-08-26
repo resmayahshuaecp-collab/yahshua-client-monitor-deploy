@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Panel } from "@/components/dashboard/panel";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { DASHBOARD_STATS } from "@/components/dashboard/stats";
+import { CommunicationHub } from "@/components/dashboard/communication-hub";
 import { api } from "@/lib/api";
 
 interface ClientStats {
@@ -55,9 +56,10 @@ export default function DashboardPage() {
           />
         ))}
       </section>
-      <section aria-label="Overviews" className="grid gap-4 lg:grid-cols-2">
+      <section aria-label="Overviews" className="grid gap-4 lg:grid-cols-3">
         <Panel title="Subscription Overview" />
         <Panel title="Client Concerns Overview" />
+        <CommunicationHub />
       </section>
     </div>
   );

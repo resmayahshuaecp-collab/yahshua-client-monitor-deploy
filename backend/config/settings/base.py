@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     "core",
     "accounts",
     "clients",
+    "messaging",
 ]
 
 MIDDLEWARE = [
