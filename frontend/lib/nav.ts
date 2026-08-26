@@ -16,5 +16,7 @@ export const NAV_SECTIONS = [
   { label: "RSC", href: "/rsc", built: false },
   { label: "Meetings", href: "/meetings", built: false },
   { label: "Reports", href: "/reports", built: false },
-  { label: "Training", href: "/training", built: false },
+  { label: "Training Videos", href: "/training/videos", built: true },
+  { label: "Training Materials", href: "/training/materials", built: true },
+  { label: "Client Contracts", href: "/training/contracts", built: true },
 ] as const;

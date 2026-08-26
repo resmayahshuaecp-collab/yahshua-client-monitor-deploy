@@ -8,11 +8,13 @@ from clients.api import router as clients_router
 from messaging.api import router as messaging_router
 from core.api_errors import register_refusal_handler
 from core.api_health import healthz
+from onboarding.api import router as onboarding_router
 
 api = NinjaExtraAPI(title="YAHSHUA Client Monitor API", version="1.0.0")
 register_refusal_handler(api)
 api.add_router("/auth", auth_router)
 api.add_router("/clients", clients_router)
+api.add_router("/onboarding", onboarding_router)
 api.add_router("/messaging", messaging_router)
 
 urlpatterns = [
