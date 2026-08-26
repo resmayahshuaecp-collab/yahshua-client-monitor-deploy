@@ -132,7 +132,7 @@ export function CommunicationChannel({ conversationType }: { conversationType: s
               </div>
             ) : (
               messages.map((msg) => (
-                <div key={msg.id} className="border-l-2 border-gray-200 pl-3 py-2">
+                <div key={msg.id} className="border-l-2 border-gray-200 pl-3 py-2 group hover:bg-gray-50 pr-2 rounded">
                   {editingId === msg.id ? (
                     <div className="space-y-2">
                       <Input
@@ -163,23 +163,26 @@ export function CommunicationChannel({ conversationType }: { conversationType: s
                     </div>
                   ) : (
                     <>
-                      <div className="flex items-baseline justify-between gap-2">
-                        <div className="flex items-baseline gap-2">
-                          <span className="font-medium text-sm">{msg.sender.username}</span>
-                          <span className="text-xs text-muted">
-                            {new Date(msg.created_at).toLocaleTimeString()}
-                          </span>
-                          {msg.is_edited && (
-                            <span className="text-xs text-muted italic">(edited)</span>
-                          )}
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1">
+                          <div className="flex items-baseline gap-2 flex-wrap">
+                            <span className="font-medium text-sm">{msg.sender.username}</span>
+                            <span className="text-xs text-muted">
+                              {new Date(msg.created_at).toLocaleTimeString()}
+                            </span>
+                            {msg.is_edited && (
+                              <span className="text-xs text-muted italic">(edited)</span>
+                            )}
+                          </div>
+                          <p className="text-sm text-ink mt-1">{msg.text}</p>
                         </div>
                         {currentUserId === msg.sender.id && (
-                          <div className="flex gap-1">
+                          <div className="flex gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                             <Button
                               size="sm"
                               variant="ghost"
                               onClick={() => startEdit(msg)}
-                              className="h-6 px-2 text-xs"
+                              className="h-6 px-2 text-xs whitespace-nowrap"
                             >
                               Edit
                             </Button>
@@ -187,19 +190,18 @@ export function CommunicationChannel({ conversationType }: { conversationType: s
                               size="sm"
                               variant="ghost"
                               onClick={() => handleDeleteMessage(msg.id)}
-                              className="h-6 px-2 text-xs text-red-600 hover:text-red-700"
+                              className="h-6 px-2 text-xs text-red-600 hover:text-red-700 whitespace-nowrap"
                             >
                               Delete
                             </Button>
                           </div>
                         )}
                       </div>
-                      <p className="text-sm text-ink mt-1">{msg.text}</p>
                     </>
                   )}
                 </div>
               ))
-            )}
+            )}}
           </div>
 
           {/* Message input */}
