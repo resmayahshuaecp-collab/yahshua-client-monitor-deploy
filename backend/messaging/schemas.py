@@ -25,3 +25,6 @@ class ConversationOut(Schema):
 
 class MessageIn(Schema):
     text: str
+
+class MessageEditIn(Schema):
+    text: str

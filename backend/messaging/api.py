@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from accounts.csrf import enforce_csrf_for_cookie_auth
 from accounts.refusals import Refusal
 from messaging.models import Conversation, Message, ConversationType
-from messaging.schemas import ConversationOut, MessageOut, MessageIn
+from messaging.schemas import ConversationOut, MessageOut, MessageIn, MessageEditIn
 
 User = get_user_model()
 router = Router(tags=["messaging"])
@@ -125,3 +125,55 @@ def create_message(request, conversation_id: int, payload: MessageIn):
         "text": message.text,
         "created_at": message.created_at,
     }
+
+
+def _get_or_refuse_message(conversation_id: int, message_id: int) -> Message:
+    try:
+        return Message.objects.get(pk=message_id, conversation_id=conversation_id)
+    except Message.DoesNotExist:
+        raise Refusal("not_found", "No message with that id.") from None
+
+
+@router.put(
+    "/conversations/{conversation_id}/messages/{message_id}",
+    response=MessageOut,
+    auth=None,
+)
+def edit_message(request, conversation_id: int, message_id: int, payload: MessageEditIn):
+    enforce_csrf_for_cookie_auth(request)
+    if not request.actor.is_authenticated:
+        raise Refusal("not_authenticated", "This request carries no identity.")
+
+    message = _get_or_refuse_message(conversation_id, message_id)
+    if message.sender_id != request.actor.user_id:
+        raise Refusal("not_owner", "You can only edit your own messages.")
+    message.text = payload.text
+    message.save(update_fields=["text"])
+
+    return {
+        "id": message.id,
+        "sender": {
+            "id": message.sender.id,
+            "username": message.sender.username,
+            "email": message.sender.email,
+        },
+        "text": message.text,
+        "created_at": message.created_at,
+    }
+
+
+@router.delete(
+    "/conversations/{conversation_id}/messages/{message_id}",
+    response={200: dict},
+    auth=None,
+)
+def delete_message(request, conversation_id: int, message_id: int):
+    enforce_csrf_for_cookie_auth(request)
+    if not request.actor.is_authenticated:
+        raise Refusal("not_authenticated", "This request carries no identity.")
+
+    message = _get_or_refuse_message(conversation_id, message_id)
+    if message.sender_id != request.actor.user_id:
+        raise Refusal("not_owner", "You can only delete your own messages.")
+    message.delete()
+    return {"ok": True}
