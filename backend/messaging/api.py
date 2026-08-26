@@ -1,4 +1,5 @@
 from ninja import Router
+from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 
 from accounts.csrf import enforce_csrf_for_cookie_auth
@@ -6,6 +7,7 @@ from accounts.refusals import Refusal
 from messaging.models import Conversation, Message, ConversationType
 from messaging.schemas import ConversationOut, MessageOut, MessageIn
 
+User = get_user_model()
 router = Router(tags=["messaging"])
 
 
@@ -106,9 +108,10 @@ def create_message(request, conversation_id: int, payload: MessageIn):
         raise Refusal("not_authenticated", "This request carries no identity.")
     
     conversation = _get_or_refuse_conversation(conversation_id)
+    sender = User.objects.get(pk=request.actor.user_id)
     message = Message.objects.create(
         conversation=conversation,
-        sender=request.actor.user,
+        sender=sender,
         text=payload.text
     )
     
