@@ -46,7 +46,9 @@ export function CommunicationChannel({ conversationType }: { conversationType: s
 
   // Update current user ID when user data loads
   useEffect(() => {
+    console.log("User data:", user);
     if (user?.user_id) {
+      console.log("Setting currentUserId to:", user.user_id);
       setCurrentUserId(user.user_id);
     }
   }, [user]);
@@ -131,7 +133,9 @@ export function CommunicationChannel({ conversationType }: { conversationType: s
                 No messages yet. Start the conversation!
               </div>
             ) : (
-              messages.map((msg) => (
+              messages.map((msg) => {
+                console.log("Message:", msg, "Current User ID:", currentUserId, "Sender ID:", msg.sender.id, "Match:", currentUserId === msg.sender.id);
+                return (
                 <div key={msg.id} className="border-l-2 border-gray-200 pl-3 py-2 group hover:bg-gray-50 pr-2 rounded">
                   {editingId === msg.id ? (
                     <div className="space-y-2">
@@ -177,12 +181,12 @@ export function CommunicationChannel({ conversationType }: { conversationType: s
                           <p className="text-sm text-ink mt-1">{msg.text}</p>
                         </div>
                         {currentUserId === msg.sender.id && (
-                          <div className="flex gap-1 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex gap-1 flex-shrink-0">
                             <Button
                               size="sm"
                               variant="ghost"
                               onClick={() => startEdit(msg)}
-                              className="h-6 px-2 text-xs whitespace-nowrap"
+                              className="h-6 px-2 text-xs whitespace-nowrap text-blue-600 hover:text-blue-700"
                             >
                               Edit
                             </Button>
@@ -200,8 +204,9 @@ export function CommunicationChannel({ conversationType }: { conversationType: s
                     </>
                   )}
                 </div>
-              ))
-            )}}
+                );
+              })
+            )}
           </div>
 
           {/* Message input */}
