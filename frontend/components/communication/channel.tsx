@@ -1,10 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
-import { fetchActor } from "@/lib/actor";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -18,6 +16,8 @@ interface Message {
   };
   text: string;
   created_at: string;
+  updated_at: string;
+  is_edited: boolean;
 }
 
 interface Conversation {
@@ -33,6 +33,21 @@ export function CommunicationChannel({ conversationType }: { conversationType: s
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editText, setEditText] = useState("");
+  const [currentUserId, setCurrentUserId] = useState<number | null>(null);
+
+  const { data: user } = useQuery({
+    queryKey: ["user"],
+    queryFn: async () => {
+      const res = await api.get("/auth/me");
+      return res.data;
+    },
+  });
+
+  useEffect(() => {
+    if (user?.user_id) {
+      setCurrentUserId(user.user_id);
+    }
+  }, [user]);
 
   const { data: conversations = [], refetch } = useQuery({
     queryKey: ["conversations"],
@@ -40,11 +55,6 @@ export function CommunicationChannel({ conversationType }: { conversationType: s
       const res = await api.get<Conversation[]>("/messaging/conversations");
       return res.data;
     },
-  });
-
-  const { data: actor } = useQuery({
-    queryKey: ["actor"],
-    queryFn: fetchActor,
   });
 
   const currentConversation = conversations.find((c) => c.type === conversationType);
@@ -66,41 +76,33 @@ export function CommunicationChannel({ conversationType }: { conversationType: s
     }
   };
 
-  const startEdit = (msg: Message) => {
-    setEditingId(msg.id);
-    setEditText(msg.text);
-  };
-
-  const cancelEdit = () => {
-    setEditingId(null);
-    setEditText("");
-  };
-
-  const saveEdit = async (messageId: number) => {
-    if (!editText.trim() || !currentConversation) return;
+  const handleEditMessage = async (messageId: number) => {
+    if (!editText.trim()) return;
     try {
-      await api.put(
-        `/messaging/conversations/${currentConversation.id}/messages/${messageId}`,
-        { text: editText }
-      );
-      cancelEdit();
+      await api.put(`/messaging/messages/${messageId}`, {
+        text: editText,
+      });
+      setEditingId(null);
+      setEditText("");
       refetch();
     } catch (error) {
       console.error("Failed to edit message:", error);
     }
   };
 
-  const deleteMessage = async (messageId: number) => {
-    if (!currentConversation) return;
-    if (!window.confirm("Delete this message?")) return;
+  const handleDeleteMessage = async (messageId: number) => {
+    if (!window.confirm("Are you sure you want to delete this message?")) return;
     try {
-      await api.delete(
-        `/messaging/conversations/${currentConversation.id}/messages/${messageId}`
-      );
+      await api.delete(`/messaging/messages/${messageId}`);
       refetch();
     } catch (error) {
       console.error("Failed to delete message:", error);
     }
+  };
+
+  const startEdit = (message: Message) => {
+    setEditingId(message.id);
+    setEditText(message.text);
   };
 
   const messages = currentConversation?.messages || [];
@@ -122,44 +124,71 @@ export function CommunicationChannel({ conversationType }: { conversationType: s
               </div>
             ) : (
               messages.map((msg) => (
-                <div key={msg.id} className="group border-l-2 border-gray-200 pl-3">
-                  <div className="flex items-baseline gap-2">
-                    <span className="font-medium text-sm">{msg.sender.username}</span>
-                    <span className="text-xs text-muted">
-                      {new Date(msg.created_at).toLocaleTimeString()}
-                    </span>
-                  </div>
+                <div
+                  key={msg.id}
+                  className="border-l-2 border-gray-200 pl-3 py-2 group hover:bg-gray-50 pr-2 rounded"
+                >
                   {editingId === msg.id ? (
-                    <div className="flex gap-2 mt-1">
+                    <div className="space-y-2">
                       <Input
                         type="text"
                         value={editText}
                         onChange={(e) => setEditText(e.target.value)}
-                        className="flex-1"
+                        className="text-sm"
                       />
-                      <Button onClick={() => saveEdit(msg.id)} disabled={!editText.trim()}>
-                        Save
-                      </Button>
-                      <Button onClick={cancelEdit}>Cancel</Button>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleEditMessage(msg.id)}
+                          disabled={!editText.trim()}
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            setEditingId(null);
+                            setEditText("");
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2">
-                      <p className="text-sm text-ink">{msg.text}</p>
-                      {actor?.user_id === msg.sender.id && (
-                        <>
-                          <button
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1">
+                        <div className="flex items-baseline gap-2 flex-wrap">
+                          <span className="font-medium text-sm">{msg.sender.username}</span>
+                          <span className="text-xs text-muted">
+                            {new Date(msg.created_at).toLocaleTimeString()}
+                          </span>
+                          {msg.is_edited && (
+                            <span className="text-xs text-muted italic">(edited)</span>
+                          )}
+                        </div>
+                        <p className="text-sm text-ink mt-1">{msg.text}</p>
+                      </div>
+                      {currentUserId === msg.sender.id && (
+                        <div className="flex gap-1 flex-shrink-0">
+                          <Button
+                            size="sm"
+                            variant="ghost"
                             onClick={() => startEdit(msg)}
-                            className="text-xs text-blue-500 hover:underline"
+                            className="h-6 px-2 text-xs whitespace-nowrap text-blue-600 hover:text-blue-700"
                           >
                             Edit
-                          </button>
-                          <button
-                            onClick={() => deleteMessage(msg.id)}
-                            className="text-xs text-red-500 hover:underline"
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleDeleteMessage(msg.id)}
+                            className="h-6 px-2 text-xs text-red-600 hover:text-red-700 whitespace-nowrap"
                           >
                             Delete
-                          </button>
-                        </>
+                          </Button>
+                        </div>
                       )}
                     </div>
                   )}
