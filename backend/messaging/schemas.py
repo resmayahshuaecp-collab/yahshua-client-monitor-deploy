@@ -13,6 +13,8 @@ class MessageOut(Schema):
     sender: UserOut
     text: str
     created_at: datetime
+    updated_at: datetime
+    is_edited: bool
 
 
 class ConversationOut(Schema):
