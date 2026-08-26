@@ -46,8 +46,8 @@ export function CommunicationChannel({ conversationType }: { conversationType: s
 
   // Update current user ID when user data loads
   useEffect(() => {
-    if (user?.id) {
-      setCurrentUserId(user.id);
+    if (user?.user_id) {
+      setCurrentUserId(user.user_id);
     }
   }, [user]);
 
