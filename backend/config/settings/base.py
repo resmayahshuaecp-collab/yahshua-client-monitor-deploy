@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     "accounts",
     "clients",
     "onboarding",
+    "concerns",
     "messaging",
 ]
 
