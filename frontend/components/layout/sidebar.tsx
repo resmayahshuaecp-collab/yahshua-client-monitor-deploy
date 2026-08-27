@@ -22,7 +22,7 @@ const GROUPS: Group[] = [
     { label: "CLIENT" }, { label: "Globe Group Chat", href: "/communication/globe-chat" }, { label: "SME Group Chat", href: "/communication/sme-chat" },
   ] },
   { label: "Client Concerns", icon: Wrench, href: "/concerns", children: [
-    { label: "Bugs", href: "/bugs", disabled: true }, { label: "Request for System Customization", href: "/rsc", disabled: true }, { label: "Book Meetings", href: "/meetings", disabled: true },
+    { label: "Bugs", href: "/bugs" }, { label: "Request for System Customization", href: "/rsc", disabled: true }, { label: "Book Meetings", href: "/meetings", disabled: true },
   ] },
   { label: "Reports", icon: FileText, href: "/reports", children: [
     { label: "Bugs", href: "/bugs", disabled: true }, { label: "RSC", href: "/rsc", disabled: true }, { label: "Contracts Monitoring", href: "/reports/contracts", disabled: true },
