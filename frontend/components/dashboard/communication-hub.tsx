@@ -14,15 +14,11 @@ interface Conversation {
 const CHANNEL_LINKS: Record<string, string> = {
   GLOBE_CHAT: "/communication/globe-chat",
   SME_CHAT: "/communication/sme-chat",
-  CONSULTANT_CHANNEL: "/communication/consultant-channel",
-  ENGINEER_CHANNEL: "/communication/engineer-channel",
 };
 
 const CHANNEL_LABELS: Record<string, string> = {
   GLOBE_CHAT: "Globe Group Chat",
   SME_CHAT: "SME Group Chat",
-  CONSULTANT_CHANNEL: "Consultant Channel",
-  ENGINEER_CHANNEL: "System Engineer Channel",
 };
 
 export function CommunicationHub() {
@@ -36,8 +32,8 @@ export function CommunicationHub() {
 
   return (
     <Panel title="Communication Hub">
-      <div className="space-y-2 w-full p-2">
-        {conversations.map((conv) => (
+      <div className="w-full space-y-2 p-2">
+        {conversations.filter((conv) => conv.type === "GLOBE_CHAT" || conv.type === "SME_CHAT").map((conv) => (
           <Link
             key={conv.id}
             href={CHANNEL_LINKS[conv.type] || "#"}

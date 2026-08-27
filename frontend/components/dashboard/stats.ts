@@ -11,10 +11,10 @@
  * export field."
  */
 export const DASHBOARD_STATS = [
-  { label: "Total Clients", hint: "Globe and SME combined" },
+  { label: "Total Subscription Clients", hint: "Globe and SME combined" },
   { label: "Globe Clients", hint: "Active, expiring and expired" },
   { label: "SME Clients", hint: "Active, expiring and expired" },
   { label: "Active Contracts", hint: "Not expiring within 30 days" },
-  { label: "Open Concerns", hint: "Bugs and RSC not yet resolved" },
+  { label: "Open Client Concerns", hint: "Bugs and RSC not yet resolved" },
   { label: "Meetings This Week", hint: "Booked, Monday to Sunday" },
 ] as const;

@@ -1,15 +1,21 @@
 @import "tailwindcss";
 
 @theme {
-  --color-ink: #10131a;
-  --color-muted: #6b7280;
-  --color-line: #e5e7eb;
+  --color-ink: #10204a;
+  --color-muted: #6f7890;
+  --color-line: #e3e7ef;
   --color-surface: #ffffff;
-  --color-canvas: #f7f8fa;
-  --color-accent: #1f5f9c;
+  --color-canvas: #f3f5fa;
+  --color-accent: #4164e8;
 }
+
+* { box-sizing: border-box; }
 
 body {
   background: var(--color-canvas);
   color: var(--color-ink);
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  font-size: 13px;
 }
+
+button, input { font: inherit; }

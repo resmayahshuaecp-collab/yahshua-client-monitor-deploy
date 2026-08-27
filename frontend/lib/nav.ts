@@ -10,8 +10,6 @@ export const NAV_SECTIONS = [
   { label: "SME Clients", href: "/sme", built: true },
   { label: "Globe Group Chat", href: "/communication/globe-chat", built: true },
   { label: "SME Group Chat", href: "/communication/sme-chat", built: true },
-  { label: "Consultant Channel", href: "/communication/consultant-channel", built: true },
-  { label: "System Engineer Channel", href: "/communication/engineer-channel", built: true },
   { label: "Bugs", href: "/bugs", built: false },
   { label: "RSC", href: "/rsc", built: false },
   { label: "Meetings", href: "/meetings", built: false },

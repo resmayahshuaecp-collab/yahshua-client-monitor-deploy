@@ -7,17 +7,9 @@ import { Pencil, Plus, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api";
+import type { Client } from "@/lib/clients";
 
 export type ClientSegment = "GLOBE" | "SME";
-
-interface Client {
-  id: number;
-  name: string;
-  segment: ClientSegment;
-  contract_start: string;
-  contract_end: string;
-  status: string;
-}
 
 interface ClientForm {
   name: string;
@@ -63,6 +55,7 @@ export function ClientManager({ segment }: { segment: ClientSegment }) {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["clients"] });
+      await queryClient.invalidateQueries({ queryKey: ["client-stats"] });
       closeForm();
     },
     onError: () => setError("Unable to save this client. Please try again."),
@@ -70,7 +63,10 @@ export function ClientManager({ segment }: { segment: ClientSegment }) {
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => api.delete(`/clients/${id}`),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["clients"] }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["clients"] });
+      await queryClient.invalidateQueries({ queryKey: ["client-stats"] });
+    },
     onError: () => setError("Unable to delete this client. Please try again."),
   });
 

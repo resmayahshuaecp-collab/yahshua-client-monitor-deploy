@@ -14,15 +14,24 @@ describe("Sidebar", () => {
     );
   });
 
-  it("renders unbuilt sections as disabled, not as links", () => {
-    // A screen that is reachable but empty and a screen that does not
-    // exist must not look the same. Linking to an unbuilt route is how six
-    // Done screens ended up unreachable.
+  it("renders grouped navigation with collapsed controls", () => {
     render(<Sidebar />);
 
-    const globe = screen.getByText("Globe Clients");
-    expect(globe.closest("a")).toBeNull();
-    expect(globe.closest("[aria-disabled='true']")).not.toBeNull();
+    expect(screen.getByRole("button", { name: /Consultant Onboarding/ })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("button", { name: /Communication/ })).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("link", { name: "AI Support" })).toHaveAttribute("href", "/ai-support");
+  });
+
+  it("reveals only client chats when Communication is expanded", async () => {
+    const user = (await import("@testing-library/user-event")).default.setup();
+    render(<Sidebar />);
+
+    await user.click(screen.getByRole("button", { name: /Communication/ }));
+    expect(screen.queryByRole("link", { name: "Consultant Channel" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "System Engineer Channel" })).toBeNull();
+    expect(screen.getByRole("link", { name: "Globe Group Chat" })).toHaveAttribute("href", "/communication/globe-chat");
+    expect(screen.getByRole("link", { name: "SME Group Chat" })).toHaveAttribute("href", "/communication/sme-chat");
+    expect(screen.getByText("CLIENT")).toBeTruthy();
   });
 
   it("marks the current section", () => {
