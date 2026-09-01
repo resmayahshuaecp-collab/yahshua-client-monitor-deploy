@@ -55,3 +55,8 @@ class MeetingIn(Schema):
     title: str
     description: str = ""
     scheduled_for: datetime
+
+
+class ConcernStatsOut(Schema):
+    open_concerns: int
+    meetings_this_week: int

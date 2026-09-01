@@ -1,16 +1,16 @@
+from datetime import timedelta
+
+from django.utils import timezone
 from ninja import Router
 
 from accounts.csrf import enforce_csrf_for_cookie_auth
 from accounts.refusals import Refusal
-from concerns.models import Bug
-from concerns.schemas import BugOut, BugIn, BugUpdateIn
-from concerns.models import Bug, Rsc
-from concerns.schemas import BugOut, BugIn, BugUpdateIn, RscOut, RscIn, RscUpdateIn
-from concerns.models import Bug, Rsc, Meeting
+from concerns.models import Bug, Meeting, Rsc
 from concerns.schemas import (
     BugOut, BugIn, BugUpdateIn,
     RscOut, RscIn, RscUpdateIn,
     MeetingOut, MeetingIn,
+    ConcernStatsOut,
 )
 
 router = Router(tags=["concerns"])
@@ -55,6 +55,7 @@ def update_bug(request, bug_id: int, payload: BugUpdateIn):
     bug.save()
     return bug
 
+
 def _get_or_refuse_rsc(rsc_id: int) -> Rsc:
     try:
         return Rsc.objects.get(pk=rsc_id)
@@ -67,6 +68,27 @@ def list_rsc(request):
     if not request.actor.is_authenticated:
         raise Refusal("not_authenticated", "This request carries no identity.")
     return Rsc.objects.all()
+
+
+@router.get("/stats", response=ConcernStatsOut, auth=None)
+def concern_stats(request):
+    if not request.actor.is_authenticated:
+        raise Refusal("not_authenticated", "This request carries no identity.")
+
+    open_bugs = Bug.objects.exclude(status="RESOLVED").count()
+    open_rsc = Rsc.objects.exclude(status="COMPLETED").count()
+
+    now = timezone.now()
+    week_end = now + timedelta(days=7)
+    meetings_this_week = Meeting.objects.filter(
+        scheduled_for__gte=now,
+        scheduled_for__lte=week_end,
+    ).count()
+
+    return {
+        "open_concerns": open_bugs + open_rsc,
+        "meetings_this_week": meetings_this_week,
+    }
 
 
 @router.post("/rsc", response=RscOut, auth=None)
@@ -94,6 +116,7 @@ def update_rsc(request, rsc_id: int, payload: RscUpdateIn):
     rsc.save()
     return rsc
 
+
 @router.get("/meetings", response=list[MeetingOut], auth=None)
 def list_meetings(request):
     if not request.actor.is_authenticated:
@@ -111,6 +134,7 @@ def create_meeting(request, payload: MeetingIn):
         description=payload.description,
         scheduled_for=payload.scheduled_for,
     )
+
 
 def _get_or_refuse_meeting(meeting_id: int) -> Meeting:
     try:

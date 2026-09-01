@@ -10,6 +10,11 @@ import { CommunicationHub } from "@/components/dashboard/communication-hub";
 import { api } from "@/lib/api";
 import { currentClientStatus, type Client } from "@/lib/clients";
 
+interface ConcernStats {
+  open_concerns: number;
+  meetings_this_week: number;
+}
+
 export default function DashboardPage() {
   const { data: clients = [] } = useQuery({
     queryKey: ["clients"],
@@ -23,6 +28,14 @@ export default function DashboardPage() {
   const globeClients = clients.filter((client) => client.segment === "GLOBE");
   const smeClients = clients.filter((client) => client.segment === "SME");
 
+  const { data: concernData } = useQuery({
+    queryKey: ["concern-stats"],
+    queryFn: async () => {
+      const res = await api.get<ConcernStats>("/concerns/stats");
+      return res.data;
+    },
+  });
+
   const valueFor = (label: string): number | undefined => {
     switch (label) {
       case "Total Subscription Clients":
@@ -34,9 +47,10 @@ export default function DashboardPage() {
       case "Active Contracts":
         return clients.filter((client) => currentClientStatus(client) === "ACTIVE").length;
       case "Open Client Concerns":
-        return 18;
+      case "Open Concerns":
+        return concernData?.open_concerns;
       case "Meetings This Week":
-        return 7;
+        return concernData?.meetings_this_week;
       default:
         return undefined;
     }
