@@ -111,3 +111,19 @@ def create_meeting(request, payload: MeetingIn):
         description=payload.description,
         scheduled_for=payload.scheduled_for,
     )
+
+def _get_or_refuse_meeting(meeting_id: int) -> Meeting:
+    try:
+        return Meeting.objects.get(pk=meeting_id)
+    except Meeting.DoesNotExist:
+        raise Refusal("not_found", "No meeting with that id.") from None
+
+
+@router.delete("/meetings/{meeting_id}", response={200: dict}, auth=None)
+def delete_meeting(request, meeting_id: int):
+    enforce_csrf_for_cookie_auth(request)
+    if not request.actor.is_authenticated:
+        raise Refusal("not_authenticated", "This request carries no identity.")
+    meeting = _get_or_refuse_meeting(meeting_id)
+    meeting.delete()
+    return {"ok": True}

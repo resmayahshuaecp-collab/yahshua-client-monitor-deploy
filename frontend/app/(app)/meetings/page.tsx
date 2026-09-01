@@ -50,6 +50,12 @@ export default function MeetingsPage() {
     refetch();
   };
 
+  const deleteMeeting = async (id: number) => {
+    if (!window.confirm("Cancel this meeting?")) return;
+    await api.delete(`/concerns/meetings/${id}`);
+    refetch();
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -92,6 +98,7 @@ export default function MeetingsPage() {
               <th className="p-3 font-medium">Title</th>
               <th className="p-3 font-medium">Description</th>
               <th className="p-3 font-medium">Scheduled</th>
+              <th className="p-3 font-medium"></th>
             </tr>
           </thead>
           <tbody>
@@ -104,6 +111,14 @@ export default function MeetingsPage() {
                     dateStyle: "medium",
                     timeStyle: "short",
                   })}
+                </td>
+                <td className="p-3">
+                  <button
+                    onClick={() => deleteMeeting(meeting.id)}
+                    className="text-xs text-red-500 hover:underline"
+                  >
+                    Cancel
+                  </button>
                 </td>
               </tr>
             ))}
