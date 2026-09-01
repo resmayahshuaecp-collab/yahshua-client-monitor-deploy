@@ -23,3 +23,5 @@ class ClientStatsOut(Schema):
     globe: int
     sme: int
     active_contracts: int
+
+   
