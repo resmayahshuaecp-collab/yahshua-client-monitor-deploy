@@ -13,6 +13,9 @@ import { currentClientStatus, type Client } from "@/lib/clients";
 interface ConcernStats {
   open_concerns: number;
   meetings_this_week: number;
+  total_bugs: number;
+  total_rsc: number;
+  total_meetings: number;
 }
 
 export default function DashboardPage() {
@@ -72,7 +75,7 @@ export default function DashboardPage() {
       </section>
       <section aria-label="Overviews" className="grid gap-4 lg:grid-cols-3">
         <Panel title="Subscription Client Overview"><div className="flex items-center gap-7"><div className="grid size-36 place-items-center rounded-full text-center" style={{ background: `conic-gradient(#4164e8 0 ${clients.length ? globeClients.length / clients.length * 100 : 0}%, #16b981 ${clients.length ? globeClients.length / clients.length * 100 : 0}% 100%)` }}><div className="grid size-16 place-items-center rounded-full bg-surface"><span className="text-xl font-bold">{clients.length}<small className="block text-[9px] font-normal text-muted">Total Clients</small></span></div></div><div className="space-y-4 text-xs"><p><b className="text-blue-500">●</b> <strong>Globe Clients</strong><span className="block pl-4 text-muted">{globeClients.length} ({clients.length ? (globeClients.length / clients.length * 100).toFixed(1) : "0.0"}%)</span></p><p><b className="text-emerald-500">●</b> <strong>SME Clients</strong><span className="block pl-4 text-muted">{smeClients.length} ({clients.length ? (smeClients.length / clients.length * 100).toFixed(1) : "0.0"}%)</span></p></div></div></Panel>
-        <Panel title="Client Concerns Overview"><div className="w-full space-y-2 text-xs"><p className="flex justify-between border-b border-line pb-3"><span>🐞 &nbsp; Bugs</span><b>12</b><a className="text-blue-500">View All <ArrowRight size={12} className="inline" /></a></p><p className="flex justify-between border-b border-line pb-3"><span>🔧 &nbsp; Request for System Customization</span><b>4</b><a className="text-blue-500">View All <ArrowRight size={12} className="inline" /></a></p><p className="flex justify-between"><span>▣ &nbsp; Book Meetings</span><b>2</b><a className="text-blue-500">View All <ArrowRight size={12} className="inline" /></a></p></div></Panel>
+        <Panel title="Client Concerns Overview"><div className="w-full space-y-2 text-xs"><p className="flex justify-between border-b border-line pb-3"><span>🐞 &nbsp; Bugs</span><b>{concernData?.total_bugs ?? 0}</b><a className="text-blue-500">View All <ArrowRight size={12} className="inline" /></a></p><p className="flex justify-between border-b border-line pb-3"><span>🔧 &nbsp; Request for System Customization</span><b>{concernData?.total_rsc ?? 0}</b><a className="text-blue-500">View All <ArrowRight size={12} className="inline" /></a></p><p className="flex justify-between"><span>▣ &nbsp; Book Meetings</span><b>{concernData?.total_meetings ?? 0}</b><a className="text-blue-500">View All <ArrowRight size={12} className="inline" /></a></p></div></Panel>
         <CommunicationHub />
       </section>
       <section className="grid gap-4 lg:grid-cols-2"><StatusStrip title="Globe Clients" clients={globeClients} /><StatusStrip title="SME Clients" clients={smeClients} /></section>

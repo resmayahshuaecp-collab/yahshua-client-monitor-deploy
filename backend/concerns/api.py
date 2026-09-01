@@ -88,6 +88,9 @@ def concern_stats(request):
     return {
         "open_concerns": open_bugs + open_rsc,
         "meetings_this_week": meetings_this_week,
+        "total_bugs": Bug.objects.count(),
+        "total_rsc": Rsc.objects.count(),
+        "total_meetings": Meeting.objects.count(),
     }
 
 

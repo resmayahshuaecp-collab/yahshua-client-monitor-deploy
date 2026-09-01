@@ -60,3 +60,6 @@ class MeetingIn(Schema):
 class ConcernStatsOut(Schema):
     open_concerns: int
     meetings_this_week: int
+    total_bugs: int
+    total_rsc: int
+    total_meetings: int
