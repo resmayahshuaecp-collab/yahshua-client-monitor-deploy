@@ -63,7 +63,23 @@ export default function RscPage() {
       await queryClient.invalidateQueries({ queryKey: ["rsc-report-summary"] });
       await queryClient.invalidateQueries({ queryKey: ["concern-stats"] });
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to create RSC request";
+      let message = "Failed to create RSC request";
+      
+      if (err instanceof Error) {
+        message = err.message;
+      } else if (typeof err === "object" && err !== null) {
+        const error = err as any;
+        if (error.response?.data?.detail) {
+          message = error.response.data.detail;
+        } else if (error.response?.data?.message) {
+          message = error.response.data.message;
+        } else if (error.response?.statusText) {
+          message = `${error.response.status} ${error.response.statusText}`;
+        } else if (error.message) {
+          message = error.message;
+        }
+      }
+      
       setError(message);
       console.error("Error creating RSC request:", err);
     } finally {
