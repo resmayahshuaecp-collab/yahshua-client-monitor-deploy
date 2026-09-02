@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
 import { api } from "@/lib/api";
@@ -30,9 +30,12 @@ const LABEL: Record<string, string> = {
 };
 
 export default function BugsPage() {
+  const queryClient = useQueryClient();
   const [title, setTitle] = useState("");
   const [priority, setPriority] = useState("MEDIUM");
   const [filterPriority, setFilterPriority] = useState("ALL");
+  const [isCreating, setIsCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const { data = [], refetch } = useQuery({
     queryKey: ["bugs"],
@@ -44,20 +47,52 @@ export default function BugsPage() {
 
   const createBug = async () => {
     if (!title.trim()) return;
-    await api.post("/concerns/bugs", { title, priority });
-    setTitle("");
-    setPriority("MEDIUM");
-    refetch();
+    
+    setIsCreating(true);
+    setError(null);
+    
+    try {
+      await api.post("/concerns/bugs", { title, priority });
+      setTitle("");
+      setPriority("MEDIUM");
+      
+      // Refetch all related queries
+      await refetch();
+      
+      // Invalidate dashboard report queries to update the counts
+      await queryClient.invalidateQueries({ queryKey: ["bug-report-summary"] });
+      await queryClient.invalidateQueries({ queryKey: ["concern-stats"] });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to create bug";
+      setError(message);
+      console.error("Error creating bug:", err);
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const changeStatus = async (id: number, status: string) => {
-    await api.put(`/concerns/bugs/${id}`, { status });
-    refetch();
+    try {
+      await api.put(`/concerns/bugs/${id}`, { status });
+      await refetch();
+      // Invalidate dashboard reports when bug status changes
+      await queryClient.invalidateQueries({ queryKey: ["bug-report-summary"] });
+      await queryClient.invalidateQueries({ queryKey: ["concern-stats"] });
+    } catch (err) {
+      console.error("Error updating bug status:", err);
+    }
   };
 
   const changePriority = async (id: number, p: string) => {
-    await api.put(`/concerns/bugs/${id}`, { priority: p });
-    refetch();
+    try {
+      await api.put(`/concerns/bugs/${id}`, { priority: p });
+      await refetch();
+      // Invalidate dashboard reports when bug priority changes
+      await queryClient.invalidateQueries({ queryKey: ["bug-report-summary"] });
+      await queryClient.invalidateQueries({ queryKey: ["concern-stats"] });
+    } catch (err) {
+      console.error("Error updating bug priority:", err);
+    }
   };
 
   const bugs =
@@ -73,28 +108,43 @@ export default function BugsPage() {
       </div>
 
       <Card>
-        <div className="flex gap-2 p-4">
-          <Input
-            type="text"
-            placeholder="New bug title..."
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="flex-1"
-          />
-          <select
-            value={priority}
-            onChange={(e) => setPriority(e.target.value)}
-            className="rounded border px-2 text-sm"
-          >
-            {PRIORITIES.map((p) => (
-              <option key={p} value={p}>
-                {LABEL[p]}
-              </option>
-            ))}
-          </select>
-          <Button onClick={createBug} disabled={!title.trim()}>
-            Add Bug
-          </Button>
+        <div className="p-4">
+          <div className="flex gap-2">
+            <Input
+              type="text"
+              placeholder="New bug title..."
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && title.trim() && !isCreating) {
+                  createBug();
+                }
+              }}
+              className="flex-1"
+              disabled={isCreating}
+            />
+            <select
+              value={priority}
+              onChange={(e) => setPriority(e.target.value)}
+              className="rounded border px-2 text-sm"
+              disabled={isCreating}
+            >
+              {PRIORITIES.map((p) => (
+                <option key={p} value={p}>
+                  {LABEL[p]}
+                </option>
+              ))}
+            </select>
+            <Button 
+              onClick={createBug} 
+              disabled={!title.trim() || isCreating}
+            >
+              {isCreating ? "Adding..." : "Add Bug"}
+            </Button>
+          </div>
+          {error && (
+            <p className="mt-2 text-sm text-red-600">{error}</p>
+          )}
         </div>
       </Card>
 
