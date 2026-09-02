@@ -1,9 +1,11 @@
 from django.conf import settings
 from django.http import HttpRequest
 from django.middleware.csrf import CsrfViewMiddleware
+import logging
 
 from accounts.refusals import Refusal
 
+logger = logging.getLogger(__name__)
 UNSAFE_METHODS = frozenset({"POST", "PUT", "PATCH", "DELETE"})
 
 
@@ -21,6 +23,7 @@ class _Enforcer(CsrfViewMiddleware):
     """
 
     def _reject(self, request, reason):
+        logger.warning(f"CSRF rejected: {reason}")
         raise Refusal("csrf_failed", f"CSRF verification failed: {reason}")
 
 
@@ -35,15 +38,21 @@ def enforce_csrf_for_cookie_auth(request: HttpRequest) -> None:
     In DEBUG mode, CSRF checks are relaxed to allow development without
     strict token validation.
     """
+    logger.debug(f"enforce_csrf_for_cookie_auth: method={request.method}, auth_source={getattr(request, 'auth_source', None)}, DEBUG={settings.DEBUG}")
+    
     if request.method not in UNSAFE_METHODS:
+        logger.debug(f"enforce_csrf_for_cookie_auth: Skipping for {request.method}")
         return
     if getattr(request, "auth_source", None) != "cookie":
+        logger.debug(f"enforce_csrf_for_cookie_auth: Skipping for non-cookie auth")
         return
 
     # In development, allow requests without CSRF token
     if settings.DEBUG:
+        logger.debug(f"enforce_csrf_for_cookie_auth: Skipping CSRF check in DEBUG mode")
         return
 
+    logger.debug(f"enforce_csrf_for_cookie_auth: Performing CSRF check")
     enforcer = _Enforcer(lambda r: None)
     enforcer.process_request(request)
     enforcer.process_view(request, lambda r: None, (), {})

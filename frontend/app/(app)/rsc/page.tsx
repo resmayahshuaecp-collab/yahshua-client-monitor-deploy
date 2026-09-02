@@ -69,7 +69,23 @@ export default function RscPage() {
         message = err.message;
       } else if (typeof err === "object" && err !== null) {
         const error = err as any;
-        if (error.response?.data?.detail) {
+        // Check for Refusal response with code and message
+        if (error.response?.data?.code && error.response?.data?.message) {
+          const code = error.response.data.code;
+          const msg = error.response.data.message;
+          // Map error codes to user-friendly messages
+          if (code === "not_authenticated") {
+            message = "Your session has expired. Please log in again.";
+          } else if (code === "csrf_failed") {
+            message = "Security validation failed. Please refresh and try again.";
+          } else if (code === "no_role") {
+            message = "Your account does not have a role assigned.";
+          } else if (code === "role_not_permitted") {
+            message = "You do not have permission to create RSC requests.";
+          } else {
+            message = msg;
+          }
+        } else if (error.response?.data?.detail) {
           message = error.response.data.detail;
         } else if (error.response?.data?.message) {
           message = error.response.data.message;

@@ -1,4 +1,5 @@
 from datetime import timedelta
+import logging
 
 from django.utils import timezone
 from django.db.models import Q
@@ -16,6 +17,7 @@ from concerns.schemas import (
     RscReportSummary,
 )
 
+logger = logging.getLogger(__name__)
 router = Router(tags=["concerns"])
 
 
@@ -72,11 +74,16 @@ def top_open_bugs(request):
 
 @router.post("/bugs", response=BugOut, auth=None)
 def create_bug(request, payload: BugIn):
+    logger.debug(f"create_bug: method={request.method}, auth_source={getattr(request, 'auth_source', None)}, actor={request.actor}")
     enforce_csrf_for_cookie_auth(request)
+    logger.debug(f"create_bug: CSRF check passed, actor.is_authenticated={request.actor.is_authenticated}")
+    
     if not request.actor.is_authenticated:
+        logger.warning(f"create_bug: Request not authenticated")
         raise Refusal("not_authenticated", "This request carries no identity.")
     
     try:
+        logger.debug(f"create_bug: Creating bug with title={payload.title}, priority={payload.priority}")
         return Bug.objects.create(
             title=payload.title,
             description=payload.description or "",
@@ -84,6 +91,7 @@ def create_bug(request, payload: BugIn):
             status="OPEN",
         )
     except Exception as e:
+        logger.error(f"create_bug: Exception creating bug: {str(e)}")
         raise Refusal("creation_failed", f"Failed to create bug: {str(e)}") from e
 
 

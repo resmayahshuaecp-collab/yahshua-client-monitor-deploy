@@ -4,10 +4,12 @@ from django.http import HttpRequest
 from ninja_jwt.exceptions import TokenError
 from ninja_jwt.settings import api_settings
 from ninja_jwt.tokens import AccessToken, RefreshToken
+import logging
 
 from accounts.actor import Actor
 from accounts.providers.base import AuthResult
 
+logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
@@ -22,22 +24,29 @@ class LocalAuthProvider:
 
     def resolve(self, request: HttpRequest) -> AuthResult | None:
         token, source = self._read_credential(request)
+        logger.debug(f"LocalAuthProvider.resolve: token_found={bool(token)}, source={source}")
+        
         if not token:
             return None
 
         try:
             payload = AccessToken(token)
-        except TokenError:
+            logger.debug(f"LocalAuthProvider.resolve: token decoded successfully")
+        except TokenError as e:
+            logger.debug(f"LocalAuthProvider.resolve: TokenError: {str(e)}")
             return None
 
         user_id = payload.get(api_settings.USER_ID_CLAIM)
         if user_id is None:
+            logger.debug(f"LocalAuthProvider.resolve: No user_id in token")
             return None
 
         user = User.objects.filter(pk=user_id, is_active=True).select_related("profile").first()
         if user is None:
+            logger.debug(f"LocalAuthProvider.resolve: User not found or inactive")
             return None
 
+        logger.debug(f"LocalAuthProvider.resolve: User resolved: {user.email}")
         return AuthResult(actor=self.actor_for(user), source=source)
 
     def issue_tokens(self, user) -> tuple[str, str]:
