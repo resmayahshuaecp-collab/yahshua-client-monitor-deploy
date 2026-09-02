@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.http import HttpRequest
 from django.middleware.csrf import CsrfViewMiddleware
 
@@ -20,7 +21,7 @@ class _Enforcer(CsrfViewMiddleware):
     """
 
     def _reject(self, request, reason):
-        raise Refusal("csrf_failed", "CSRF verification failed.")
+        raise Refusal("csrf_failed", f"CSRF verification failed: {reason}")
 
 
 def enforce_csrf_for_cookie_auth(request: HttpRequest) -> None:
@@ -30,10 +31,17 @@ def enforce_csrf_for_cookie_auth(request: HttpRequest) -> None:
     can cause, which is exactly what CSRF defends against. A bearer header
     is not, so requiring a token on the header path would buy no safety and
     would break curl and server-to-server callers.
+    
+    In DEBUG mode, CSRF checks are relaxed to allow development without
+    strict token validation.
     """
     if request.method not in UNSAFE_METHODS:
         return
     if getattr(request, "auth_source", None) != "cookie":
+        return
+
+    # In development, allow requests without CSRF token
+    if settings.DEBUG:
         return
 
     enforcer = _Enforcer(lambda r: None)
