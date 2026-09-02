@@ -24,4 +24,9 @@ class ClientStatsOut(Schema):
     sme: int
     active_contracts: int
 
-   
+
+class ContractReportSummary(Schema):
+    total: int
+    active: int
+    expiring_soon: int
+    expired: int

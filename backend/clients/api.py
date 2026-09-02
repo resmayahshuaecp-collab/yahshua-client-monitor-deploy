@@ -5,8 +5,7 @@ from accounts.models import Role
 from accounts.permissions import require_role
 from accounts.refusals import Refusal
 from clients.models import Client
-from clients.schemas import ClientIn, ClientOut
-from clients.schemas import ClientIn, ClientOut, ClientStatsOut
+from clients.schemas import ClientIn, ClientOut, ClientStatsOut, ContractReportSummary
 
 router = Router(tags=["clients"])
 
@@ -34,6 +33,24 @@ def client_stats(request):
         "globe": sum(c.segment == "GLOBE" for c in clients),
         "sme": sum(c.segment == "SME" for c in clients),
         "active_contracts": sum(c.status == "ACTIVE" for c in clients),
+    }
+
+
+@router.get("/contracts/summary", response=ContractReportSummary, auth=None)
+def contract_report_summary(request):
+    if not request.actor.is_authenticated:
+        raise Refusal("not_authenticated", "This request carries no identity.")
+    
+    clients = list(Client.objects.all())
+    active = sum(c.status == "ACTIVE" for c in clients)
+    expiring_soon = sum(c.status == "EXPIRING_SOON" for c in clients)
+    expired = sum(c.status == "EXPIRED" for c in clients)
+    
+    return {
+        "total": len(clients),
+        "active": active,
+        "expiring_soon": expiring_soon,
+        "expired": expired,
     }
 
 @router.post("/", response=ClientOut, auth=None)

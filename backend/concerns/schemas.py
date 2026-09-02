@@ -63,3 +63,29 @@ class ConcernStatsOut(Schema):
     total_bugs: int
     total_rsc: int
     total_meetings: int
+
+
+class BugReportSummary(Schema):
+    total: int
+    open: int
+    in_progress: int
+    resolved: int
+
+
+class RscReportSummary(Schema):
+    total: int
+    open: int
+    in_progress: int
+    completed: int
+
+
+class ContractStatusCount(Schema):
+    status: str
+    count: int
+
+
+class ContractReportSummary(Schema):
+    total: int
+    active: int
+    expiring_soon: int
+    expired: int

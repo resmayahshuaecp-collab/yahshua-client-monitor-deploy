@@ -138,15 +138,13 @@ export function CommunicationChannel({ conversationType }: { conversationType: s
                       />
                       <div className="flex gap-2">
                         <Button
-                          size="sm"
                           onClick={() => handleEditMessage(msg.id)}
                           disabled={!editText.trim()}
                         >
                           Save
                         </Button>
                         <Button
-                          size="sm"
-                          variant="outline"
+                          variant="ghost"
                           onClick={() => {
                             setEditingId(null);
                             setEditText("");
@@ -173,7 +171,6 @@ export function CommunicationChannel({ conversationType }: { conversationType: s
                       {currentUserId === msg.sender.id && (
                         <div className="flex gap-1 flex-shrink-0">
                           <Button
-                            size="sm"
                             variant="ghost"
                             onClick={() => startEdit(msg)}
                             className="h-6 px-2 text-xs whitespace-nowrap text-blue-600 hover:text-blue-700"
@@ -181,7 +178,6 @@ export function CommunicationChannel({ conversationType }: { conversationType: s
                             Edit
                           </Button>
                           <Button
-                            size="sm"
                             variant="ghost"
                             onClick={() => handleDeleteMessage(msg.id)}
                             className="h-6 px-2 text-xs text-red-600 hover:text-red-700 whitespace-nowrap"

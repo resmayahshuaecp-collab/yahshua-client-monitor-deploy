@@ -1,6 +1,7 @@
 from datetime import timedelta
 
 from django.utils import timezone
+from django.db.models import Q
 from ninja import Router
 
 from accounts.csrf import enforce_csrf_for_cookie_auth
@@ -11,6 +12,8 @@ from concerns.schemas import (
     RscOut, RscIn, RscUpdateIn,
     MeetingOut, MeetingIn,
     ConcernStatsOut,
+    BugReportSummary,
+    RscReportSummary,
 )
 
 router = Router(tags=["concerns"])
@@ -28,6 +31,43 @@ def list_bugs(request):
     if not request.actor.is_authenticated:
         raise Refusal("not_authenticated", "This request carries no identity.")
     return Bug.objects.all()
+
+
+@router.get("/bugs/summary", response=BugReportSummary, auth=None)
+def bug_report_summary(request):
+    if not request.actor.is_authenticated:
+        raise Refusal("not_authenticated", "This request carries no identity.")
+    
+    total = Bug.objects.count()
+    open_count = Bug.objects.filter(status="OPEN").count()
+    in_progress = Bug.objects.filter(status="IN_PROGRESS").count()
+    resolved = Bug.objects.filter(status="RESOLVED").count()
+    
+    return {
+        "total": total,
+        "open": open_count,
+        "in_progress": in_progress,
+        "resolved": resolved,
+    }
+
+
+@router.get("/bugs/top-open", response=list[BugOut], auth=None)
+def top_open_bugs(request):
+    if not request.actor.is_authenticated:
+        raise Refusal("not_authenticated", "This request carries no identity.")
+    
+    # Priority ordering: HIGH=0, MEDIUM=1, LOW=2
+    priority_order = {"HIGH": 0, "MEDIUM": 1, "LOW": 2}
+    
+    open_bugs = Bug.objects.filter(~Q(status="RESOLVED")).order_by("-updated_at")
+    
+    # Sort by priority (HIGH first) then by updated_at (newest first)
+    sorted_bugs = sorted(
+        open_bugs,
+        key=lambda b: (priority_order.get(b.priority, 999), -b.updated_at.timestamp())
+    )
+    
+    return sorted_bugs[:5]
 
 
 @router.post("/bugs", response=BugOut, auth=None)
@@ -68,6 +108,43 @@ def list_rsc(request):
     if not request.actor.is_authenticated:
         raise Refusal("not_authenticated", "This request carries no identity.")
     return Rsc.objects.all()
+
+
+@router.get("/rsc/summary", response=RscReportSummary, auth=None)
+def rsc_report_summary(request):
+    if not request.actor.is_authenticated:
+        raise Refusal("not_authenticated", "This request carries no identity.")
+    
+    total = Rsc.objects.count()
+    open_count = Rsc.objects.filter(status="OPEN").count()
+    in_progress = Rsc.objects.filter(status="IN_PROGRESS").count()
+    completed = Rsc.objects.filter(status="COMPLETED").count()
+    
+    return {
+        "total": total,
+        "open": open_count,
+        "in_progress": in_progress,
+        "completed": completed,
+    }
+
+
+@router.get("/rsc/top-open", response=list[RscOut], auth=None)
+def top_open_rsc(request):
+    if not request.actor.is_authenticated:
+        raise Refusal("not_authenticated", "This request carries no identity.")
+    
+    # Priority ordering: HIGH=0, MEDIUM=1, LOW=2
+    priority_order = {"HIGH": 0, "MEDIUM": 1, "LOW": 2}
+    
+    open_rsc = Rsc.objects.filter(~Q(status="COMPLETED")).order_by("-updated_at")
+    
+    # Sort by priority (HIGH first) then by updated_at (newest first)
+    sorted_rsc = sorted(
+        open_rsc,
+        key=lambda r: (priority_order.get(r.priority, 999), -r.updated_at.timestamp())
+    )
+    
+    return sorted_rsc[:5]
 
 
 @router.get("/stats", response=ConcernStatsOut, auth=None)
