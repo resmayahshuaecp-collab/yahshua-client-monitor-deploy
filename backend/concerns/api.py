@@ -75,11 +75,16 @@ def create_bug(request, payload: BugIn):
     enforce_csrf_for_cookie_auth(request)
     if not request.actor.is_authenticated:
         raise Refusal("not_authenticated", "This request carries no identity.")
-    return Bug.objects.create(
-        title=payload.title,
-        description=payload.description,
-        priority=payload.priority,
-    )
+    
+    try:
+        return Bug.objects.create(
+            title=payload.title,
+            description=payload.description or "",
+            priority=payload.priority,
+            status="OPEN",
+        )
+    except Exception as e:
+        raise Refusal("creation_failed", f"Failed to create bug: {str(e)}") from e
 
 
 @router.put("/bugs/{bug_id}", response=BugOut, auth=None)
@@ -176,11 +181,16 @@ def create_rsc(request, payload: RscIn):
     enforce_csrf_for_cookie_auth(request)
     if not request.actor.is_authenticated:
         raise Refusal("not_authenticated", "This request carries no identity.")
-    return Rsc.objects.create(
-        title=payload.title,
-        description=payload.description,
-        priority=payload.priority,
-    )
+    
+    try:
+        return Rsc.objects.create(
+            title=payload.title,
+            description=payload.description or "",
+            priority=payload.priority,
+            status="OPEN",
+        )
+    except Exception as e:
+        raise Refusal("creation_failed", f"Failed to create RSC request: {str(e)}") from e
 
 
 @router.put("/rsc/{rsc_id}", response=RscOut, auth=None)
