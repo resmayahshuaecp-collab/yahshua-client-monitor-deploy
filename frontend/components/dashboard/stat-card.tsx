@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { ArrowUp, CalendarDays, FileCheck2, Globe2, MessagesSquare, UsersRound } from "lucide-react";
 
@@ -9,15 +11,19 @@ export function StatCard({
   hint,
   value,
   index = 0,
+  href,
 }: {
   label: string;
   hint: string;
   value?: number;
   index?: number;
+  href?: string;
 }) {
   const Icon = icons[index % icons.length];
-  return (
-    <Card className="min-h-[140px] p-4"><div className={`mb-3 grid size-8 place-items-center rounded-lg ${colors[index % colors.length]}`}><Icon size={16} /></div>
+
+  const inner = (
+    <Card className={`min-h-[140px] p-4${href ? " transition hover:border-blue-300 hover:shadow-sm" : ""}`}>
+      <div className={`mb-3 grid size-8 place-items-center rounded-lg ${colors[index % colors.length]}`}><Icon size={16} /></div>
       <CardTitle className="text-[10px] normal-case tracking-normal">{label}</CardTitle>
       <CardContent
         data-placeholder={value === undefined ? label : undefined}
@@ -28,4 +34,6 @@ export function StatCard({
       {index === 0 ? <p className="mt-1 flex items-center gap-1 text-[10px] font-bold text-emerald-500"><ArrowUp size={11} /> 6% vs last month</p> : <p className="mt-1 text-[10px] text-muted">{hint}</p>}
     </Card>
   );
+
+  return href ? <Link href={href} className="block">{inner}</Link> : inner;
 }
