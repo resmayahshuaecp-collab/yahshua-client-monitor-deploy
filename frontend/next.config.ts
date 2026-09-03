@@ -2,9 +2,6 @@ import path from "node:path";
 
 import type { NextConfig } from "next";
 
-const BACKEND_ORIGIN =
-  process.env.NEXT_PUBLIC_BACKEND_ORIGIN ?? "http://localhost:8085";
-
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
@@ -24,15 +21,6 @@ const nextConfig: NextConfig = {
   // files it just wrote -- `next build` compiles, then dies with ENOENT.
   // Docker never hit this because /app has no parent lockfiles.
   outputFileTracingRoot: path.join(__dirname),
-
-  async rewrites() {
-    return [
-      {
-        source: "/api/:path*",
-        destination: `${BACKEND_ORIGIN}/api/:path*`,
-      },
-    ];
-  },
 };
 
 export default nextConfig;
