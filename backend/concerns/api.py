@@ -1,4 +1,5 @@
 from datetime import timedelta
+from clients.models import Client
 import logging
 
 from django.utils import timezone
@@ -15,6 +16,7 @@ from concerns.schemas import (
     ConcernStatsOut,
     BugReportSummary,
     RscReportSummary,
+    NotificationsOut,
 )
 
 logger = logging.getLogger(__name__)
@@ -249,3 +251,32 @@ def delete_meeting(request, meeting_id: int):
     meeting = _get_or_refuse_meeting(meeting_id)
     meeting.delete()
     return {"ok": True}
+
+
+@router.get("/notifications", response=NotificationsOut, auth=None)
+def notifications(request):
+    if not request.actor.is_authenticated:
+        raise Refusal("not_authenticated", "This request carries no identity.")
+
+    items = []
+
+    for b in Bug.objects.exclude(status="RESOLVED")[:5]:
+        items.append({"type": "concern", "label": f"Open bug: {b.title}", "href": "/bugs"})
+
+    for r in Rsc.objects.exclude(status="COMPLETED")[:5]:
+        items.append({"type": "concern", "label": f"Open RSC: {r.title}", "href": "/rsc"})
+
+    now = timezone.now()
+    week_end = now + timedelta(days=7)
+    for m in Meeting.objects.filter(scheduled_for__gte=now, scheduled_for__lte=week_end)[:5]:
+        items.append({"type": "meeting", "label": f"Meeting: {m.title}", "href": "/meetings"})
+
+    for c in Client.objects.all():
+        if c.status == "EXPIRING_SOON":
+            items.append({
+                "type": "contract",
+                "label": f"Contract expiring: {c.name}",
+                "href": "/globe" if c.segment == "GLOBE" else "/sme",
+            })
+
+    return {"count": len(items), "items": items}

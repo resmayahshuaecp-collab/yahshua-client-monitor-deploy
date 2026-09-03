@@ -89,3 +89,13 @@ class ContractReportSummary(Schema):
     active: int
     expiring_soon: int
     expired: int
+
+class NotificationItem(Schema):
+    type: str      # "concern", "meeting", "contract"
+    label: str
+    href: str
+
+
+class NotificationsOut(Schema):
+    count: int
+    items: list[NotificationItem]

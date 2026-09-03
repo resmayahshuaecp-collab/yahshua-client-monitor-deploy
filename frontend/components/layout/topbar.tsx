@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Bell, HelpCircle, Menu, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
@@ -20,6 +20,12 @@ interface SearchResult {
   href: string;
 }
 
+interface NotificationItem {
+  type: string;
+  label: string;
+  href: string;
+}
+
 const TYPE_LABEL: Record<string, string> = {
   client: "Client",
   bug: "Bug",
@@ -32,6 +38,15 @@ export function Topbar({ actor }: { actor?: Actor }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [open, setOpen] = useState(false);
+  const [notifItems, setNotifItems] = useState<NotificationItem[]>([]);
+  const [notifOpen, setNotifOpen] = useState(false);
+
+  useEffect(() => {
+    api
+      .get<{ count: number; items: NotificationItem[] }>("/concerns/notifications")
+      .then((res) => setNotifItems(res.data.items))
+      .catch(() => setNotifItems([]));
+  }, []);
 
   async function signOut() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -104,10 +119,41 @@ export function Topbar({ actor }: { actor?: Actor }) {
             </div>
           )}
         </div>
-        <button aria-label="Notifications" className="relative rounded-lg bg-canvas p-2 text-muted">
-          <Bell size={15} />
-          <span className="absolute -right-1 -top-1 grid size-3 place-items-center rounded-full bg-red-500 text-[8px] text-white">5</span>
-        </button>
+        <div className="relative">
+          <button
+            aria-label="Notifications"
+            onClick={() => setNotifOpen((o) => !o)}
+            onBlur={() => setTimeout(() => setNotifOpen(false), 150)}
+            className="relative rounded-lg bg-canvas p-2 text-muted"
+          >
+            <Bell size={15} />
+            {notifItems.length > 0 && (
+              <span className="absolute -right-1 -top-1 grid size-3 place-items-center rounded-full bg-red-500 text-[8px] text-white">
+                {notifItems.length}
+              </span>
+            )}
+          </button>
+          {notifOpen && (
+            <div className="absolute right-0 top-10 z-20 w-72 rounded-lg border border-line bg-surface py-1 shadow-lg">
+              {notifItems.length === 0 ? (
+                <p className="px-3 py-2 text-xs text-muted">No notifications.</p>
+              ) : (
+                notifItems.map((n, i) => (
+                  <button
+                    key={i}
+                    onMouseDown={() => {
+                      setNotifOpen(false);
+                      router.push(n.href);
+                    }}
+                    className="block w-full px-3 py-2 text-left text-xs hover:bg-canvas"
+                  >
+                    {n.label}
+                  </button>
+                ))
+              )}
+            </div>
+          )}
+        </div>
         <button aria-label="Help" className="rounded-lg bg-canvas p-2 text-muted">
           <HelpCircle size={15} />
         </button>
