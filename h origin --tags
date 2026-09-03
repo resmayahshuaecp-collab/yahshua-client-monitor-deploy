@@ -1,0 +1,20 @@
+[33m8cd1674[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;33mtag: [m[1;33mmilestone-3[m[33m, [m[1;31morigin/milestone-3[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmilestone-3[m[33m)[m Enable Reports links in sidebar
+[33mbfb7e11[m Add detailed logging and improved error messages
+[33m0c2d397[m Fix 403 CSRF error by relaxing CSRF checks in DEBUG mode
+[33m6fc8414[m Improve error message handling in bug and RSC creation
+[33mc0b66c6[m Add CSRF middleware to backend configuration
+[33mf7b5b6b[m Add robust error handling to bug and RSC creation endpoints
+[33m932a81c[m Improve bug and RSC creation with better error handling and dashboard sync
+[33m16b78c3[m Implement Milestone 3: Reports - Bugs, RSC, and Contracts Monitoring
+[33m93a40f7[m[33m ([m[1;33mtag: [m[1;33mmilestone-2[m[33m, [m[1;31morigin/milestone-2[m[33m, [m[1;32mmilestone-2[m[33m)[m Make dashboard concern links and stat cards clickable, wire concerns overview panel
+[33mdbd6e96[m Wire Client Concerns Overview panel to live counts
+[33mc08643b[m Wire Open Concerns and Meetings This Week dashboard cards to live data
+[33m96f5f89[m Add cancel (delete) for meetings
+[33m2c9cd9e[m Add RSC and Book Meetings features (Milestone 2)
+[33mb98ef6c[m Add Bugs feature: create, status transitions, priority filter (Milestone 2)
+[33m80b940d[m Add Bug, RSC, and Meeting models (Milestone 2 data foundation)
+[33m617299d[m[33m ([m[1;33mtag: [m[1;33mmilestone-1[m[33m)[m Implement dynamic dashboard and grouped navigation
+[33m2d48082[m Add consultant onboarding pages (training videos, materials, contracts)
+[33mb01956d[m Merge branch 'main' of https://github.com/yahshua-abba/yahshua-client-monitor
+[33mac33b41[m Add edit/delete for messages, restricted to message owner
+[33m15e8da2[m fix: make edit/delete buttons always visible with debugging
