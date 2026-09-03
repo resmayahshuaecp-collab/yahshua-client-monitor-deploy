@@ -25,7 +25,7 @@ const GROUPS: Group[] = [
     { label: "Bugs", href: "/bugs" }, { label: "Request for System Customization", href: "/rsc" }, { label: "Book Meetings", href: "/meetings" },
   ] },
   { label: "Reports", icon: FileText, href: "/reports", children: [
-    { label: "Bugs", href: "/bugs", disabled: true }, { label: "RSC", href: "/rsc", disabled: true }, { label: "Contracts Monitoring", href: "/reports/contracts", disabled: true },
+    { label: "Bugs", href: "/reports/bugs" }, { label: "RSC", href: "/reports/rsc" }, { label: "Contracts Monitoring", href: "/reports/contracts" },
   ] },
 ];
 
