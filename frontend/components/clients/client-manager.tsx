@@ -112,6 +112,27 @@ export function ClientManager({ segment }: { segment: ClientSegment }) {
     }
   }
 
+      async function downloadCsv() {
+    const res = await api.get<Client[]>("/clients/");
+    const segmentClients = res.data.filter((c) => c.segment === segment);
+
+    const header = ["name", "segment", "contract_start", "contract_end", "status"];
+    const rows = segmentClients.map((c) =>
+      [c.name, c.segment, c.contract_start, c.contract_end, c.status]
+        .map((v) => `"${String(v).replace(/"/g, '""')}"`)
+        .join(",")
+    );
+    const csv = [header.join(","), ...rows].join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${segment.toLowerCase()}-clients.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
@@ -121,10 +142,15 @@ export function ClientManager({ segment }: { segment: ClientSegment }) {
             {clients.length} total · {count("ACTIVE")} active · {count("EXPIRING_SOON")} expiring soon · {count("EXPIRED")} expired
           </p>
         </div>
-        <Button type="button" onClick={openCreateForm}>
-          <Plus aria-hidden="true" className="mr-1 inline-block size-4" />
-          Add Client
-        </Button>
+        <div className="flex gap-2">
+          <Button type="button" variant="ghost" onClick={downloadCsv}>
+            Download CSV
+          </Button>
+          <Button type="button" onClick={openCreateForm}>
+            <Plus aria-hidden="true" className="mr-1 inline-block size-4" />
+            Add Client
+          </Button>
+        </div>
       </div>
 
       {error && <p className="text-sm text-red-700" role="alert">{error}</p>}

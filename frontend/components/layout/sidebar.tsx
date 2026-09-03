@@ -52,7 +52,7 @@ export function Sidebar() {
         })}
         <Link href="/ai-support" className="flex items-center gap-2 rounded-lg px-2 py-2 text-[11px] font-semibold text-blue-100/80 hover:bg-white/10"><Bot size={14} /> AI Support</Link>
       </div>
-      <div className="mt-auto border-t border-white/10 pt-4"><span className="flex items-center gap-2 px-2 py-2 text-[11px] text-blue-100/80"><Settings size={14} /> Settings</span><span className="flex items-center gap-2 px-2 py-2 text-[11px] text-blue-100/80"><CircleHelp size={14} /> Help &amp; Support</span></div>
+      <div className="mt-auto border-t border-white/10 pt-4"><Link href="/settings" className="flex items-center gap-2 rounded-lg px-2 py-2 text-[11px] text-blue-100/80 hover:bg-white/10"><Settings size={14} /> Settings</Link><Link href="/help" className="flex items-center gap-2 rounded-lg px-2 py-2 text-[11px] text-blue-100/80 hover:bg-white/10"><CircleHelp size={14} /> Help &amp; Support</Link></div>
     </nav>
   );
 }
