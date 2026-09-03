@@ -68,6 +68,7 @@ export default function RscPage() {
       if (err instanceof Error) {
         message = err.message;
       } else if (typeof err === "object" && err !== null) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const error = err as any;
         // Check for Refusal response with code and message
         if (error.response?.data?.code && error.response?.data?.message) {
