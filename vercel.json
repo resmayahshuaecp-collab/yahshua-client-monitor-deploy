@@ -1,18 +1,22 @@
 ﻿{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "functions": {
-    "backend/config/wsgi.py": {
-      "maxDuration": 60
+  "services": {
+    "frontend": {
+      "root": "frontend/",
+      "framework": "nextjs"
+    },
+    "backend": {
+      "root": "backend/",
+      "entrypoint": "config.wsgi:application"
     }
   },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/backend/config/wsgi.py"
+      "destination": { "service": "backend" }
     },
     {
       "source": "/(.*)",
-      "destination": "/frontend/$1"
+      "destination": { "service": "frontend" }
     }
   ]
 }
