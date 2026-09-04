@@ -8,8 +8,7 @@ async function proxy(req: NextRequest, path: string[]) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("cm_access")?.value;
   
-  const joined = path.join("/");
-const url = `${BACKEND}/api/${joined}${joined.endsWith("/") ? "" : "/"}${req.nextUrl.search}`;
+  const url = `${BACKEND}/api/${path.join("/")}${req.nextUrl.search}`;
   
   const headers = new Headers();
   headers.set("Content-Type", "application/json");
@@ -21,6 +20,7 @@ const url = `${BACKEND}/api/${joined}${joined.endsWith("/") ? "" : "/"}${req.nex
     method: req.method,
     headers,
     body: req.method !== "GET" && req.method !== "HEAD" ? req.body : undefined,
+    redirect: "follow",
     // @ts-expect-error duplex is required for streaming
     duplex: "half",
   });
