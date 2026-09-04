@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND = process.env.BACKEND_URL ?? "";
+const BACKEND = process.env.BACKEND_URL || "https://yahshua-client-monitor-deploy-lrp5-sigma.vercel.app";
 console.log("BACKEND_URL at load time:", BACKEND);
 
 async function proxy(req: NextRequest, path: string[]) {
