@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const BACKEND = process.env.BACKEND_URL ?? "";
+console.log("BACKEND_URL at load time:", BACKEND);
 
 async function proxy(req: NextRequest, path: string[]) {
-  const url = `${BACKEND}/api/${path.join("/")}${req.nextUrl.search}`;
+  const backendUrl = process.env.BACKEND_URL ?? "";
+  console.log("BACKEND_URL at request time:", backendUrl);
+  
+  const url = `${backendUrl}/api/${path.join("/")}${req.nextUrl.search}`;
+  console.log("Proxying to:", url);
+  
   const headers = new Headers(req.headers);
   headers.delete("host");
 
