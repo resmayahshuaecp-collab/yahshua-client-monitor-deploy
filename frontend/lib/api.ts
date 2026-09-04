@@ -1,7 +1,9 @@
 import axios, { type InternalAxiosRequestConfig } from "axios";
 
+const BACKEND_ORIGIN = process.env.NEXT_PUBLIC_BACKEND_ORIGIN ?? "http://localhost:8085";
+
 export function apiUrl(path: string): string {
-  return `/api${path}`;
+  return `${BACKEND_ORIGIN}/api${path}`;
 }
 
 function readCookie(name: string): string | undefined {
@@ -19,7 +21,7 @@ interface RetriableRequestConfig extends InternalAxiosRequestConfig {
 }
 
 export const api = axios.create({
-  baseURL: `/api`,
+  baseURL: `${BACKEND_ORIGIN}/api`,
   // The access token lives in an httpOnly cookie, so nothing here can read
   // it. This flag is what makes the browser send it.
   withCredentials: true,
