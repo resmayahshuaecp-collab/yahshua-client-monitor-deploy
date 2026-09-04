@@ -1,8 +1,9 @@
 import sys
 import os
 
-# Add backend directory to Python path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+# Get the backend directory (parent of api/)
+backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, backend_dir)
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.production")
 
@@ -17,7 +18,7 @@ try:
 except Exception as e:
     print(f"Migration error: {e}")
 
-# Create admin user if doesn't exist
+# Create admin user
 try:
     from django.contrib.auth import get_user_model
     User = get_user_model()
