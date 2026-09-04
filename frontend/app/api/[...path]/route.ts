@@ -8,7 +8,8 @@ async function proxy(req: NextRequest, path: string[]) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("cm_access")?.value;
   
-  const url = `${BACKEND}/api/${path.join("/")}${req.nextUrl.search}`;
+  const joined = path.join("/");
+const url = `${BACKEND}/api/${joined}${joined.endsWith("/") ? "" : "/"}${req.nextUrl.search}`;
   
   const headers = new Headers();
   headers.set("Content-Type", "application/json");
