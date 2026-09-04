@@ -1,0 +1,18 @@
+﻿{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "backend/config/wsgi.py": {
+      "maxDuration": 60
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/backend/config/wsgi.py"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/frontend/$1"
+    }
+  ]
+}
