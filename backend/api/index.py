@@ -1,24 +1,34 @@
 import sys
 import os
 
-# Get the backend directory (parent of api/)
+# Debug: print where we are
+print("__file__:", __file__)
+print("cwd:", os.getcwd())
+print("listdir cwd:", os.listdir(os.getcwd()))
+
 backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+print("backend_dir:", backend_dir)
+print("listdir backend_dir:", os.listdir(backend_dir))
+
 sys.path.insert(0, backend_dir)
+sys.path.insert(0, os.getcwd())
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings.production")
 
-import django
-django.setup()
+try:
+    import django
+    django.setup()
+    print("Django setup OK")
+except Exception as e:
+    print(f"Django setup error: {e}")
 
 from django.core.management import call_command
 
-# Run migrations
 try:
     call_command("migrate", "--no-input")
 except Exception as e:
     print(f"Migration error: {e}")
 
-# Create admin user
 try:
     from django.contrib.auth import get_user_model
     User = get_user_model()
@@ -31,7 +41,6 @@ try:
 except Exception as e:
     print(f"User creation error: {e}")
 
-# Seed data
 try:
     from clients.models import Client
     if Client.objects.count() == 0:
