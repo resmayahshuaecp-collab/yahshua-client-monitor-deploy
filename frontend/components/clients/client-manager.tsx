@@ -41,7 +41,7 @@ export function ClientManager({ segment }: { segment: ClientSegment }) {
   const { data, isLoading } = useQuery({
     queryKey: ["clients", segment.toLowerCase()],
     queryFn: async () => {
-      const res = await api.get<Client[]>("/clients/");
+      const res = await api.get<Client[]>("/clients");
       return res.data.filter((client) => client.segment === segment);
     },
   });
@@ -51,7 +51,7 @@ export function ClientManager({ segment }: { segment: ClientSegment }) {
       if (editingClient) {
         return api.put(`/clients/${editingClient.id}`, values);
       }
-      return api.post("/clients/", values);
+      return api.post("/clients", values);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["clients"] });
@@ -113,7 +113,7 @@ export function ClientManager({ segment }: { segment: ClientSegment }) {
   }
 
       async function downloadCsv() {
-    const res = await api.get<Client[]>("/clients/");
+    const res = await api.get<Client[]>("/clients");
     const segmentClients = res.data.filter((c) => c.segment === segment);
 
     const header = ["name", "segment", "contract_start", "contract_end", "status"];

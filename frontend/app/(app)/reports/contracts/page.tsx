@@ -33,7 +33,7 @@ export default function ContractsReportPage() {
   const { data: clients = [], isLoading: clientsLoading } = useQuery({
     queryKey: ["clients"],
     queryFn: async () => {
-      const res = await api.get<Client[]>("/clients/");
+      const res = await api.get<Client[]>("/clients");
       return res.data;
     },
   });

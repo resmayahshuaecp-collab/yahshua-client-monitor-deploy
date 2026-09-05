@@ -44,7 +44,7 @@ export default function DashboardPage() {
   const { data: clients = [] } = useQuery({
     queryKey: ["clients"],
     queryFn: async () => {
-      const res = await api.get<Client[]>("/clients/");
+      const res = await api.get<Client[]>("/clients");
       return res.data;
     },
     refetchInterval: 86400000,

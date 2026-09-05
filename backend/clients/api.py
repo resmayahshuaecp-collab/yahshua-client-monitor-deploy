@@ -17,7 +17,7 @@ def _get_or_refuse(client_id: int) -> Client:
         raise Refusal("not_found", "No client with that id.") from None
 
 
-@router.get("/", response=list[ClientOut], auth=None)
+@router.get("", response=list[ClientOut], auth=None)
 def list_clients(request):
     if not request.actor.is_authenticated:
         raise Refusal("not_authenticated", "This request carries no identity.")
@@ -53,7 +53,7 @@ def contract_report_summary(request):
         "expired": expired,
     }
 
-@router.post("/", response=ClientOut, auth=None)
+@router.post("", response=ClientOut, auth=None)
 def create_client(request, payload: ClientIn):
     enforce_csrf_for_cookie_auth(request)
     require_role(request.actor, Role.ADMIN)

@@ -23,7 +23,7 @@ export default function ClientContractsPage() {
   const { data, isLoading } = useQuery({
     queryKey: ["clients", "contracts"],
     queryFn: async () => {
-      const res = await api.get<Client[]>("/clients/");
+      const res = await api.get<Client[]>("/clients");
       return res.data;
     },
   });
