@@ -110,6 +110,15 @@ def update_bug(request, bug_id: int, payload: BugUpdateIn):
     bug.save()
     return bug
 
+@router.delete("/bugs/{bug_id}", response={200: dict}, auth=None)
+def delete_bug(request, bug_id: int):
+    enforce_csrf_for_cookie_auth(request)
+    if not request.actor.is_authenticated:
+        raise Refusal("not_authenticated", "This request carries no identity.")
+    bug = _get_or_refuse_bug(bug_id)
+    bug.delete()
+    return {"ok": True}
+
 
 def _get_or_refuse_rsc(rsc_id: int) -> Rsc:
     try:
@@ -215,6 +224,15 @@ def update_rsc(request, rsc_id: int, payload: RscUpdateIn):
         rsc.priority = payload.priority
     rsc.save()
     return rsc
+
+@router.delete("/rsc/{rsc_id}", response={200: dict}, auth=None)
+def delete_rsc(request, rsc_id: int):
+    enforce_csrf_for_cookie_auth(request)
+    if not request.actor.is_authenticated:
+        raise Refusal("not_authenticated", "This request carries no identity.")
+    rsc = _get_or_refuse_rsc(rsc_id)
+    rsc.delete()
+    return {"ok": True}
 
 
 @router.get("/meetings", response=list[MeetingOut], auth=None)

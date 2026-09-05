@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
 
 interface Rsc {
   id: number;
@@ -128,6 +129,19 @@ export default function RscPage() {
     }
   };
 
+    const deleteRsc = async (id: number, title: string) => {
+    if (!window.confirm(`Delete "${title}"?`)) return;
+    try {
+      await api.delete(`/concerns/rsc/${id}`);
+      await refetch();
+      await queryClient.invalidateQueries({ queryKey: ["rsc-report-summary"] });
+      await queryClient.invalidateQueries({ queryKey: ["concern-stats"] });
+    } catch (err) {
+      setError("Failed to delete request");
+      console.error("Error deleting RSC request:", err);
+    }
+  };
+
   const items =
     filterPriority === "ALL"
       ? data
@@ -204,6 +218,7 @@ export default function RscPage() {
               <th className="p-3 font-medium">Title</th>
               <th className="p-3 font-medium">Priority</th>
               <th className="p-3 font-medium">Status</th>
+              <th className="p-3 font-medium">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -235,6 +250,16 @@ export default function RscPage() {
                       </option>
                     ))}
                   </select>
+                </td>
+                                <td className="p-3">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    aria-label={`Delete ${r.title}`}
+                    onClick={() => deleteRsc(r.id, r.title)}
+                  >
+                    <Trash2 aria-hidden="true" className="size-4 text-red-700" />
+                  </Button>
                 </td>
               </tr>
             ))}
