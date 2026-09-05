@@ -21,16 +21,18 @@ async function proxy(req: NextRequest, path: string[]) {
     headers.set("Authorization", `Bearer ${accessToken}`);
   }
 
+  // Buffer the body instead of streaming it. Streaming (req.body + duplex)
+  // works locally but arrives empty through Vercel's serverless runtime.
+  const hasBody = req.method !== "GET" && req.method !== "HEAD";
+  const body = hasBody ? await req.arrayBuffer() : undefined;
+
   let response: Response;
   try {
     response = await fetch(url, {
       method: req.method,
       headers,
-      body:
-        req.method !== "GET" && req.method !== "HEAD" ? req.body : undefined,
+      body,
       redirect: "follow",
-      // @ts-expect-error duplex is required for streaming
-      duplex: "half",
     });
   } catch {
     return NextResponse.json(
