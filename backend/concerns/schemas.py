@@ -56,6 +56,11 @@ class MeetingIn(Schema):
     description: str = ""
     scheduled_for: datetime
 
+class MeetingUpdateIn(Schema):
+    title: str | None = None
+    description: str | None = None
+    scheduled_for: datetime | None = None
+
 
 class ConcernStatsOut(Schema):
     open_concerns: int

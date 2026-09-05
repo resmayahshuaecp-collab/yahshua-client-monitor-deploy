@@ -12,7 +12,7 @@ from concerns.models import Bug, Meeting, Rsc
 from concerns.schemas import (
     BugOut, BugIn, BugUpdateIn,
     RscOut, RscIn, RscUpdateIn,
-    MeetingOut, MeetingIn,
+    MeetingOut, MeetingIn, MeetingUpdateIn,
     ConcernStatsOut,
     BugReportSummary,
     RscReportSummary,
@@ -270,6 +270,20 @@ def delete_meeting(request, meeting_id: int):
     meeting.delete()
     return {"ok": True}
 
+@router.put("/meetings/{meeting_id}", response=MeetingOut, auth=None)
+def update_meeting(request, meeting_id: int, payload: MeetingUpdateIn):
+    enforce_csrf_for_cookie_auth(request)
+    if not request.actor.is_authenticated:
+        raise Refusal("not_authenticated", "This request carries no identity.")
+    meeting = _get_or_refuse_meeting(meeting_id)
+    if payload.title is not None:
+        meeting.title = payload.title
+    if payload.description is not None:
+        meeting.description = payload.description
+    if payload.scheduled_for is not None:
+        meeting.scheduled_for = payload.scheduled_for
+    meeting.save()
+    return meeting
 
 @router.get("/notifications", response=NotificationsOut, auth=None)
 def notifications(request):

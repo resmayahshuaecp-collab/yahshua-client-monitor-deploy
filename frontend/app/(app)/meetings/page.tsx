@@ -26,6 +26,7 @@ export default function MeetingsPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [scheduledFor, setScheduledFor] = useState("");
+  const [editingId, setEditingId] = useState<number | null>(null);
 
   const { data = [], refetch } = useQuery({
     queryKey: ["meetings"],
@@ -35,19 +36,38 @@ export default function MeetingsPage() {
     },
   });
 
-  const createMeeting = async () => {
+  const saveMeeting = async () => {
     if (!title.trim() || !scheduledFor) return;
 
-    await api.post("/concerns/meetings", {
+    const payload = {
       title,
       description,
       scheduled_for: scheduledFor,
-    });
+    };
 
+    if (editingId !== null) {
+      await api.put(`/concerns/meetings/${editingId}`, payload);
+    } else {
+      await api.post("/concerns/meetings", payload);
+    }
+
+    clearForm();
+    refetch();
+  };
+
+  const clearForm = () => {
     setTitle("");
     setDescription("");
     setScheduledFor("");
-    refetch();
+    setEditingId(null);
+  };
+
+  const startEdit = (meeting: Meeting) => {
+    setEditingId(meeting.id);
+    setTitle(meeting.title);
+    setDescription(meeting.description);
+    // datetime-local needs "YYYY-MM-DDTHH:mm" with no seconds or timezone
+    setScheduledFor(meeting.scheduled_for.slice(0, 16));
   };
 
   const deleteMeeting = async (id: number) => {
@@ -84,9 +104,14 @@ export default function MeetingsPage() {
               onChange={(e) => setScheduledFor(e.target.value)}
               className="flex-1"
             />
-            <Button onClick={createMeeting} disabled={!title.trim() || !scheduledFor}>
-              Add Meeting
+                        <Button onClick={saveMeeting} disabled={!title.trim() || !scheduledFor}>
+              {editingId !== null ? "Save Changes" : "Add Meeting"}
             </Button>
+            {editingId !== null && (
+              <Button type="button" variant="ghost" onClick={clearForm}>
+                Cancel
+              </Button>
+            )}
           </div>
         </div>
       </Card>
@@ -112,13 +137,21 @@ export default function MeetingsPage() {
                     timeStyle: "short",
                   })}
                 </td>
-                <td className="p-3">
-                  <button
-                    onClick={() => deleteMeeting(meeting.id)}
-                    className="text-xs text-red-500 hover:underline"
-                  >
-                    Cancel
-                  </button>
+                                <td className="p-3">
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => startEdit(meeting)}
+                      className="text-xs text-blue-600 hover:underline"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => deleteMeeting(meeting.id)}
+                      className="text-xs text-red-500 hover:underline"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
