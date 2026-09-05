@@ -11,9 +11,12 @@ async function proxy(req: NextRequest, path: string[]) {
   const url = `${BACKEND}/api/${path.join("/")}${req.nextUrl.search}`;
 
   const headers = new Headers();
-  // Forward the client's Content-Type so uploads (multipart/form-data) survive.
   const incomingCT = req.headers.get("Content-Type");
-  if (incomingCT) headers.set("Content-Type", incomingCT);
+  if (incomingCT?.toLowerCase().startsWith("multipart/form-data")) {
+    headers.set("Content-Type", incomingCT);
+  } else if (req.method !== "GET" && req.method !== "HEAD") {
+    headers.set("Content-Type", "application/json");
+  }
   if (accessToken) {
     headers.set("Authorization", `Bearer ${accessToken}`);
   }
