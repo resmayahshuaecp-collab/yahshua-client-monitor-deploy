@@ -4,10 +4,11 @@ import Link from "next/link";
 import { useQuery } from "@tanstack/react-query";
 
 import { Panel } from "@/components/dashboard/panel";
-import { ArrowRight, Bot, ExternalLink, Globe2, MessageCircle, Sparkles } from "lucide-react";
+import { ArrowRight, ExternalLink, Globe2, MessageCircle } from "lucide-react";
 import { StatCard } from "@/components/dashboard/stat-card";
 import { DASHBOARD_STATS } from "@/components/dashboard/stats";
 import { CommunicationHub } from "@/components/dashboard/communication-hub";
+import { AiSupport } from "@/components/dashboard/ai-support";
 import { api } from "@/lib/api";
 import { currentClientStatus, type Client } from "@/lib/clients";
 
@@ -135,7 +136,7 @@ export default function DashboardPage() {
       </section>
       <section className="grid gap-4 lg:grid-cols-2"><StatusStrip title="Globe Clients" clients={globeClients} /><StatusStrip title="SME Clients" clients={smeClients} /></section>
       <section><div className="mb-3 flex items-center justify-between"><h2 className="text-sm font-bold">Reports Summary</h2><Link href="/reports" className="text-xs font-bold text-blue-500">View All <ArrowRight size={12} className="inline" /></Link></div><div className="grid gap-4 xl:grid-cols-3"><ReportCard title="Bugs Report" href="/reports/bugs" stats={[{ label: "Open", value: bugReport?.open ?? 0 }, { label: "In Progress", value: bugReport?.in_progress ?? 0 }, { label: "Resolved", value: bugReport?.resolved ?? 0 }]} total={bugReport?.total} /><ReportCard title="Request for System Customization" href="/reports/rsc" stats={[{ label: "Open", value: rscReport?.open ?? 0 }, { label: "In Progress", value: rscReport?.in_progress ?? 0 }, { label: "Completed", value: rscReport?.completed ?? 0 }]} total={rscReport?.total} /><ReportCard title="Contracts Monitoring Report" href="/reports/contracts" stats={[{ label: "Active", value: contractReport?.active ?? 0 }, { label: "Expiring Soon", value: contractReport?.expiring_soon ?? 0 }, { label: "Expired", value: contractReport?.expired ?? 0 }]} total={contractReport?.total} /></div></section>
-      <section className="grid gap-4 lg:grid-cols-5"><div className="min-h-44 rounded-xl border border-line bg-surface p-5 lg:col-span-3"><h2 className="flex items-center gap-2 text-sm font-bold"><Sparkles size={16} className="text-violet-500" /> AI Support <span className="ml-auto rounded-full bg-violet-100 px-2 py-1 text-[9px] text-violet-500">BETA</span></h2><p className="mt-4 inline-block rounded-lg bg-canvas px-3 py-2 text-xs">Ask me anything about YBO, clients, reports, or system usage.</p><div className="mt-3 flex gap-2"><input aria-label="AI question" placeholder="Type your question here..." className="h-9 min-w-0 flex-1 rounded-lg border border-line px-3 text-xs outline-none" /><button aria-label="Ask AI" className="grid size-9 place-items-center rounded-lg bg-blue-600 text-white"><Bot size={16} /></button></div></div><div className="min-h-44 rounded-xl border border-line bg-surface p-5 lg:col-span-2"><h2 className="text-sm font-bold">Quick Links</h2><div className="mt-3 space-y-3 text-xs">{["YBO Training Videos", "Training Materials", "Client Contracts (SME & Globe)", "Notion (Bugs / Projects)", "Pumble Channels"].map((link) => <p className="flex items-center justify-between" key={link}><span className="flex items-center gap-2"><MessageCircle size={15} className="text-blue-500" />{link}</span><ExternalLink size={13} className="text-muted" /></p>)}</div></div></section>
+      <section className="grid gap-4 lg:grid-cols-5"><AiSupport clients={clients} bugReport={bugReport} rscReport={rscReport} contractReport={contractReport} /><div className="min-h-44 rounded-xl border border-line bg-surface p-5 lg:col-span-2"><h2 className="text-sm font-bold">Quick Links</h2><div className="mt-3 space-y-3 text-xs">{["YBO Training Videos", "Training Materials", "Client Contracts (SME & Globe)", "Notion (Bugs / Projects)", "Pumble Channels"].map((link) => <p className="flex items-center justify-between" key={link}><span className="flex items-center gap-2"><MessageCircle size={15} className="text-blue-500" />{link}</span><ExternalLink size={13} className="text-muted" /></p>)}</div></div></section>
     </div>
   );
 }

@@ -37,6 +37,7 @@ export function ClientManager({ segment }: { segment: ClientSegment }) {
   const [editingClient, setEditingClient] = useState<Client | null>(null);
   const [form, setForm] = useState<ClientForm>(EMPTY_FORM);
   const [error, setError] = useState<string | null>(null);
+  const [importResult, setImportResult] = useState<string | null>(null);
 
   const { data, isLoading } = useQuery({
     queryKey: ["clients", segment.toLowerCase()],
@@ -133,6 +134,32 @@ export function ClientManager({ segment }: { segment: ClientSegment }) {
     URL.revokeObjectURL(url);
   }
 
+    async function importCsv(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+
+    setError(null);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await api.post<{ created: number; skipped: number; errors: string[] }>(
+        "/clients/import",
+        formData,
+      );
+      const { created, skipped, errors } = res.data;
+      let message = `Imported ${created} client${created === 1 ? "" : "s"}.`;
+      if (skipped) message += ` Skipped ${skipped} already in the system.`;
+      if (errors.length) message += ` ${errors.length} row(s) had problems: ${errors.join(" ")}`;
+      setImportResult(message);
+      await queryClient.invalidateQueries({ queryKey: ["clients"] });
+      await queryClient.invalidateQueries({ queryKey: ["client-stats"] });
+    } catch {
+      setError("Unable to import that file. Check the columns and try again.");
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-start justify-between gap-4">
@@ -146,6 +173,15 @@ export function ClientManager({ segment }: { segment: ClientSegment }) {
           <Button type="button" variant="ghost" onClick={downloadCsv}>
             Download CSV
           </Button>
+                    <label className="inline-flex cursor-pointer items-center rounded-md px-3 py-2 text-sm hover:bg-muted/50">
+            Import CSV
+            <input
+              type="file"
+              accept=".csv,text/csv"
+              onChange={importCsv}
+              className="hidden"
+            />
+          </label>
           <Button type="button" onClick={openCreateForm}>
             <Plus aria-hidden="true" className="mr-1 inline-block size-4" />
             Add Client
@@ -154,6 +190,7 @@ export function ClientManager({ segment }: { segment: ClientSegment }) {
       </div>
 
       {error && <p className="text-sm text-red-700" role="alert">{error}</p>}
+      {importResult && <p className="text-sm text-muted" role="status">{importResult}</p>}
 
       {isLoading ? (
         <p className="text-sm text-muted">Loading...</p>
