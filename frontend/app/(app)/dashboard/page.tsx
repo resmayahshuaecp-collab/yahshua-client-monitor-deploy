@@ -86,6 +86,16 @@ export default function DashboardPage() {
     },
   });
 
+  const now = new Date();
+  const hour = now.getHours();
+  const partOfDay = hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
+  const dateLabel = now.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+  const dayLabel = now.toLocaleDateString("en-US", { weekday: "long" });
+
   const valueFor = (label: string): number | undefined => {
     switch (label) {
       case "Total Subscription Clients":
@@ -108,7 +118,7 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-start justify-between"><div><h1 className="text-xl font-bold">Yahshua afternoon, Ralph!</h1><p className="mt-1 text-xs text-muted">Here&apos;s what&apos;s happening with your subscription management today.</p></div><div className="hidden rounded-lg border border-line bg-surface px-3 py-2 text-xs font-bold sm:block">May 20, 2026 <span className="ml-2 border-l border-line pl-2 font-normal text-muted">Wednesday</span></div></div>
+      <div className="flex items-start justify-between"><div><h1 className="text-xl font-bold">Yahshua {partOfDay}, Ralph!</h1><p className="mt-1 text-xs text-muted">Here&apos;s what&apos;s happening with your subscription management today.</p></div><div className="hidden rounded-lg border border-line bg-surface px-3 py-2 text-xs font-bold sm:block">{dateLabel} <span className="ml-2 border-l border-line pl-2 font-normal text-muted">{dayLabel}</span></div></div>
       <section aria-label="Summary" className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
         {DASHBOARD_STATS.map((stat, index) => (
           <StatCard
