@@ -40,6 +40,10 @@ const SUGGESTIONS = [
   "How to create RSC report?",
 ];
 
+function plural(n: number, word: string, pluralWord = `${word}s`) {
+  return `${n} ${n === 1 ? word : pluralWord}`;
+}
+
 const FALLBACK =
   "I can't answer that one yet. Try one of the suggested questions below, or ask about clients, bugs, contracts, or reports.";
 
@@ -57,13 +61,13 @@ export function AiSupport({
 
     if (q.includes("bug")) {
       if (!bugReport) return "I'm still loading the bug data — try again in a moment.";
-      return `There are ${bugReport.open} open bugs, ${bugReport.in_progress} in progress, and ${bugReport.resolved} resolved (${bugReport.total} total).`;
+            return `Bugs: ${plural(bugReport.open, "open bug")}, ${bugReport.in_progress} in progress, and ${bugReport.resolved} resolved (${bugReport.total} total).`;
     }
 
     if (q.includes("contract") || q.includes("expiring") || q.includes("expire")) {
       if (!contractReport)
         return "I'm still loading the contract data — try again in a moment.";
-      return `Of ${contractReport.total} contracts, ${contractReport.active} are active, ${contractReport.expiring_soon} are expiring soon, and ${contractReport.expired} have expired.`;
+            return `Of ${plural(contractReport.total, "contract")}: ${contractReport.active} active, ${contractReport.expiring_soon} expiring soon, and ${contractReport.expired} expired.`;
     }
 
     if (q.includes("rsc") && (q.includes("how") || q.includes("create") || q.includes("make"))) {
@@ -72,14 +76,14 @@ export function AiSupport({
 
     if (q.includes("rsc") || q.includes("customization")) {
       if (!rscReport) return "I'm still loading the RSC data — try again in a moment.";
-      return `There are ${rscReport.open} open RSC requests, ${rscReport.in_progress} in progress, and ${rscReport.completed} completed (${rscReport.total} total).`;
+            return `RSC requests: ${plural(rscReport.open, "open request")}, ${rscReport.in_progress} in progress, and ${rscReport.completed} completed (${rscReport.total} total).`;
     }
 
     if (q.includes("client") || q.includes("globe") || q.includes("sme")) {
       const globe = clients.filter((c) => c.segment === "GLOBE").length;
       const sme = clients.filter((c) => c.segment === "SME").length;
       const active = clients.filter((c) => currentClientStatus(c) === "ACTIVE").length;
-      return `You have ${clients.length} clients: ${globe} Globe and ${sme} SME, with ${active} active contracts overall.`;
+            return `You have ${plural(clients.length, "client")}: ${globe} Globe and ${sme} SME, with ${plural(active, "active contract")} overall.`;
     }
 
     if (q.includes("meeting")) {

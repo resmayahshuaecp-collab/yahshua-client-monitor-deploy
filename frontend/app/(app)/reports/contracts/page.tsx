@@ -143,7 +143,9 @@ export default function ContractsReportPage() {
                           </span>
                         </td>
                         <td className={`p-3 text-xs font-medium ${daysRemaining < 0 ? "text-red-600" : daysRemaining < 30 ? "text-amber-600" : "text-green-600"}`}>
-                          {daysRemaining < 0 ? `${Math.abs(daysRemaining)} ago` : `${daysRemaining} days`}
+                          {daysRemaining < 0
+  ? `${Math.abs(daysRemaining)} day${Math.abs(daysRemaining) === 1 ? "" : "s"} overdue`
+  : `${daysRemaining} day${daysRemaining === 1 ? "" : "s"}`}
                         </td>
                       </tr>
                     );
