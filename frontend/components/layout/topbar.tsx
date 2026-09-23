@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Bell, HelpCircle, Menu, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { api } from "@/lib/api";
@@ -40,6 +40,8 @@ export function Topbar({ actor }: { actor?: Actor }) {
   const [open, setOpen] = useState(false);
   const [notifItems, setNotifItems] = useState<NotificationItem[]>([]);
   const [notifOpen, setNotifOpen] = useState(false);
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  
 
   useEffect(() => {
     api
@@ -53,29 +55,34 @@ export function Topbar({ actor }: { actor?: Actor }) {
     router.push("/login");
   }
 
-  async function runSearch(value: string) {
+   function runSearch(value: string) {
     setQuery(value);
+
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+
     if (!value.trim()) {
       setResults([]);
       setOpen(false);
       return;
     }
-    try {
-      const res = await api.get<{ results: SearchResult[] }>("/search/", {
-        params: { q: value },
-      });
-      setResults(res.data.results);
-      setOpen(true);
-    } catch {
-      setResults([]);
-    }
-  }
 
-  function goTo(href: string) {
+    searchTimer.current = setTimeout(async () => {
+      try {
+        const res = await api.get<{ results: SearchResult[] }>("/search", {
+          params: { q: value },
+        });
+        setResults(res.data.results);
+        setOpen(true);
+      } catch {
+        setResults([]);
+      }
+    }, 300);
+      function goTo(href: string) {
     setOpen(false);
     setQuery("");
     setResults([]);
     router.push(href);
+  }
   }
 
   return (
@@ -85,7 +92,7 @@ export function Topbar({ actor }: { actor?: Actor }) {
         <span className="text-sm font-bold">Subscription Management System</span>
       </div>
       <div className="flex items-center gap-3">
-        <div className="relative hidden md:block">
+                <div className="relative hidden sm:block">
           <div className="flex h-8 w-52 items-center gap-2 rounded-lg border border-line bg-canvas px-3 text-xs text-muted">
             <Search size={14} />
             <input
@@ -154,7 +161,7 @@ export function Topbar({ actor }: { actor?: Actor }) {
             </div>
           )}
         </div>
-        <button aria-label="Help" className="rounded-lg bg-canvas p-2 text-muted">
+        <button aria-label="Help" onClick={() => router.push("/help")} className="rounded-lg bg-canvas p-2 text-muted">
           <HelpCircle size={15} />
         </button>
         {actor && (

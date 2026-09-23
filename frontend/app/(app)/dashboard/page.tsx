@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 
 import { Panel } from "@/components/dashboard/panel";
@@ -86,15 +87,23 @@ export default function DashboardPage() {
     },
   });
 
-  const now = new Date();
-  const hour = now.getHours();
-  const partOfDay = hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
-  const dateLabel = now.toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-  const dayLabel = now.toLocaleDateString("en-US", { weekday: "long" });
+    const [partOfDay, setPartOfDay] = useState("");
+  const [dateLabel, setDateLabel] = useState("");
+  const [dayLabel, setDayLabel] = useState("");
+
+  useEffect(() => {
+    const now = new Date();
+    const hour = now.getHours();
+    setPartOfDay(hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening");
+    setDateLabel(
+      now.toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      }),
+    );
+    setDayLabel(now.toLocaleDateString("en-US", { weekday: "long" }));
+  }, []);
 
   const valueFor = (label: string): number | undefined => {
     switch (label) {
