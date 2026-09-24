@@ -77,12 +77,13 @@ export function Topbar({ actor }: { actor?: Actor }) {
         setResults([]);
       }
     }, 300);
-      function goTo(href: string) {
+  }
+
+  function goTo(href: string) {
     setOpen(false);
     setQuery("");
     setResults([]);
     router.push(href);
-  }
   }
 
   return (
