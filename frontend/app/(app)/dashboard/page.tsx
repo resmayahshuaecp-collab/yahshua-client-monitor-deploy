@@ -136,13 +136,17 @@ export default function DashboardPage() {
             hint={stat.hint}
             value={valueFor(stat.label)}
             index={index}
-            href={
+                       href={
               stat.label === "Globe Clients"
                 ? "/globe"
                 : stat.label === "SME Clients"
                 ? "/sme"
                 : stat.label === "Meetings This Week"
                 ? "/meetings"
+                : stat.label === "Active Contracts"
+                ? "/reports/contracts"
+                : stat.label === "Open Client Concerns"
+                ? "/bugs"
                 : undefined
             }
           />
